@@ -3,21 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public struct BodyVector
+public class BodyVector<T> : IEnumerable<T>
 {
-    public const int ValueCount = 4;
+    public T upperLegL = default(T);
+    public T upperLegR = default(T);
+    public T lowerLegL = default(T);
+    public T lowerLegR = default(T);
 
-    public float upperLegL;
-    public float upperLegR;
-    public float lowerLegL;
-    public float lowerLegR;
+    public int length => 4;
 
-    public int valueCount
-    {
-        get => ValueCount;
-    }
-
-    public IEnumerable<float> values
+    public IEnumerable<T> values
     {
         get
         {
@@ -28,7 +23,19 @@ public struct BodyVector
         }
     }
 
-    public float getValue(BodyLimb limb)
+    public T this[BodyLimb limb]
+    {
+        get => getValue(limb);
+        set => setValue(limb, value);
+    }
+
+    public T this[int index]
+    {
+        get => getValue(index);
+        set => setValue(index, value);
+    }
+
+    public T getValue(BodyLimb limb)
     {
         switch (limb)
         {
@@ -45,12 +52,12 @@ public struct BodyVector
         }
     }
 
-    public float getValue(int index)
+    public T getValue(int index)
     {
         return getValue((BodyLimb)index);
     }
 
-    public void setValue(BodyLimb limb, float value)
+    public void setValue(BodyLimb limb, T value)
     {
         switch (limb)
         {
@@ -71,8 +78,64 @@ public struct BodyVector
         }
     }
 
-    public void setValue(int index, float value)
+    public void setValue(int index, T value)
     {
         setValue((BodyLimb)index, value);
+    }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        return values.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public BodyVector<T> copy()
+    {
+        var result = new BodyVector<T>();
+
+        result.upperLegL = upperLegL;
+        result.upperLegR = upperLegR;
+        result.lowerLegL = lowerLegL;
+        result.lowerLegR = lowerLegR;
+
+        return result;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj))
+            return false;
+        if (obj.GetType() != typeof(BodyVector<T>))
+            return false;
+        if (ReferenceEquals(this, obj))
+            return true;
+
+        var other = (BodyVector<T>)obj;
+        return
+            this.upperLegL.Equals(other.upperLegL) &&
+            this.upperLegR.Equals(other.upperLegR) &&
+            this.lowerLegL.Equals(other.lowerLegL) &&
+            this.lowerLegR.Equals(other.lowerLegR);
+    }
+
+    public override int GetHashCode()
+    {
+        return
+            upperLegL.GetHashCode() ^
+            upperLegR.GetHashCode() ^
+            lowerLegL.GetHashCode() ^
+            lowerLegR.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return string.Format(
+            "ULL: {0}, ULR: {1}, LLL: {2}, LLR: {3}",
+            upperLegL, upperLegR, lowerLegL, lowerLegR
+        );
     }
 }

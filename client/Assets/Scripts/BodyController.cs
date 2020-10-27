@@ -4,24 +4,53 @@ using UnityEngine;
 
 public class BodyController : MonoBehaviour
 {
-    [Header("Transforms")]
-    [SerializeField] private Transform _upperLegL = null;
-    [SerializeField] private Transform _upperLegR = null;
-    [Space]
-    [SerializeField] private Transform _lowerLegL = null;
-    [SerializeField] private Transform _lowerLegR = null;
+    [SerializeField] private BodyVectorTransform _transforms = null;
 
-
-    public BodyVector snapshot()
+    public BodyVectorFloat snapshot()
     {
-        var snapshot = new BodyVector();
+        var snapshot = new BodyVectorFloat();
 
-        for (int i = 0; i < snapshot.valueCount; ++i)
+        for (int i = 0; i < snapshot.length; ++i)
         {
-            snapshot[i] = _activeTransforms[i].localEulerAngles.z;
+            snapshot[i] = _transforms[i].localEulerAngles.z;
         }
 
         return snapshot;
     }
 
+    private void Start()
+    {
+        StartCoroutine(temporaryTransformLimb(_transforms.upperLegR, -45, 45));
+        StartCoroutine(temporaryTransformLimb(_transforms.lowerLegR, -45, 45));
+
+        StartCoroutine(temporaryTransformLimb(_transforms.upperLegL, 45, -45));
+        StartCoroutine(temporaryTransformLimb(_transforms.lowerLegL, 45, -45));
+    }
+
+    private IEnumerator temporaryTransformLimb(Transform limb, float startRot, float endRot)
+    {
+        var t = 0.0f;
+        while (t < 1)
+        {
+            t += Time.deltaTime / 2.5f;
+            var rot = Mathf.Lerp(startRot, endRot, t);
+
+            limb.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, rot));
+
+            yield return null;
+        }
+
+        t = 0.0f;
+        while (t < 1)
+        {
+            t += Time.deltaTime / 2.5f;
+            var rot = Mathf.Lerp(endRot, startRot, t);
+
+            limb.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, rot));
+
+            yield return null;
+        }
+
+        StartCoroutine(temporaryTransformLimb(limb, startRot, endRot));
+    }
 }

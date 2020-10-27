@@ -109,7 +109,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1383217973149431280}
   m_Layer: 8
-  m_Name: Lower Left Leg
+  m_Name: Lower Leg L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -274,7 +274,7 @@ GameObject:
   - component: {fileID: 1383217973976043226}
   - component: {fileID: 1383217973976043225}
   m_Layer: 8
-  m_Name: Left Foot
+  m_Name: Foot L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -320,7 +320,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1383217974125284927}
   m_Layer: 8
-  m_Name: Upper Right Leg
+  m_Name: Upper Leg R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -352,7 +352,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1383217974128211525}
   m_Layer: 8
-  m_Name: Lower Right Leg
+  m_Name: Lower Leg R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -384,7 +384,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1383217974755273681}
   m_Layer: 8
-  m_Name: Upper Left Leg
+  m_Name: Upper Leg L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -417,7 +417,7 @@ GameObject:
   - component: {fileID: 1383217975165107684}
   - component: {fileID: 1383217975165107707}
   m_Layer: 8
-  m_Name: Right Foot
+  m_Name: Foot R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
