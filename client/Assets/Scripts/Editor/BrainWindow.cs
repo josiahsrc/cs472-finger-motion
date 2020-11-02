@@ -125,8 +125,9 @@ public class BrainWindow : EditorWindow
                     output.stop = true;
                 }
 
+                var animT = input.elapsedTime % _fitConfig.clip.length;
                 AnimationMode.BeginSampling();
-                AnimationMode.SampleAnimationClip(_fitConfig.body.gameObject, _fitConfig.clip, input.elapsedTime % _fitConfig.clip.length);
+                AnimationMode.SampleAnimationClip(_fitConfig.body.gameObject, _fitConfig.clip, animT);
                 AnimationMode.EndSampling();
 
                 SceneView.RepaintAll();
