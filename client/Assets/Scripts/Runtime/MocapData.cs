@@ -5,5 +5,5 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Mocap Data", menuName = "App/Mocap Data")]
 public class MocapData : ScriptableObject
 {
-
+    public BodyVectorFloat reference;
 }
