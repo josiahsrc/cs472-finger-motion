@@ -5,6 +5,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName="Brain", menuName="App/Brain")]
 public class Brain : ScriptableObject
 {
+    [SerializeField] private string _port = "5065"; 
+
     BrainFitResponse fit(BrainFitRequest request)
     {
         throw new System.NotImplementedException();

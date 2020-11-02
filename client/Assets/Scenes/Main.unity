@@ -131,7 +131,7 @@ PrefabInstance:
     - target: {fileID: 1383217973652769700, guid: 4d5f0a96e38334cf7be960064fa468c4,
         type: 3}
       propertyPath: m_Name
-      value: Pants
+      value: Body
       objectReference: {fileID: 0}
     - target: {fileID: 1383217973652769723, guid: 4d5f0a96e38334cf7be960064fa468c4,
         type: 3}
@@ -196,47 +196,25 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 296774450}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &296774452
-MonoBehaviour:
+--- !u!95 &296774452
+Animator:
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 296774451}
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec05cff90e1c64818af1d5459e0aeeea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _transforms:
-    upperLegL: {fileID: 296774453}
-    upperLegR: {fileID: 296774456}
-    lowerLegL: {fileID: 296774455}
-    lowerLegR: {fileID: 296774454}
---- !u!4 &296774453 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1383217974755273681, guid: 4d5f0a96e38334cf7be960064fa468c4,
-    type: 3}
-  m_PrefabInstance: {fileID: 296774450}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &296774454 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1383217974128211525, guid: 4d5f0a96e38334cf7be960064fa468c4,
-    type: 3}
-  m_PrefabInstance: {fileID: 296774450}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &296774455 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1383217973149431280, guid: 4d5f0a96e38334cf7be960064fa468c4,
-    type: 3}
-  m_PrefabInstance: {fileID: 296774450}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &296774456 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1383217974125284927, guid: 4d5f0a96e38334cf7be960064fa468c4,
-    type: 3}
-  m_PrefabInstance: {fileID: 296774450}
-  m_PrefabAsset: {fileID: 0}
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 59350456a1b914eaaa49c55c7fca845a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0

@@ -140,6 +140,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1383217973652769723}
+  - component: {fileID: 296774452}
   m_Layer: 8
   m_Name: Pants
   m_TagString: Untagged
@@ -162,6 +163,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &296774452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1383217973652769700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2055d69322fb24039a41d4ad7c3b0650, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _brain: {fileID: 11400000, guid: da5687a7857a840bc90f163faa4f9c0b, type: 2}
+  _transforms:
+    upperLegL: {fileID: 1383217974755273681}
+    upperLegR: {fileID: 1383217974125284927}
+    lowerLegL: {fileID: 1383217973149431280}
+    lowerLegR: {fileID: 1383217974128211525}
 --- !u!1 &1383217973967950508
 GameObject:
   m_ObjectHideFlags: 0

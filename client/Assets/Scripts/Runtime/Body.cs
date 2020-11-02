@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BodyController : MonoBehaviour
+public class Body : MonoBehaviour
 {
+    [SerializeField] private Brain _brain = null;
+    [SerializeField] private Animator _animator = null;
     [SerializeField] private BodyVectorTransform _transforms = null;
 
     public BodyVectorFloat takeSnapshot()
