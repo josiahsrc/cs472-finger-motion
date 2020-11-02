@@ -141,8 +141,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1383217973652769723}
   - component: {fileID: 296774452}
+  - component: {fileID: 6981865934370856975}
   m_Layer: 8
-  m_Name: Pants
+  m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -176,11 +177,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _brain: {fileID: 11400000, guid: da5687a7857a840bc90f163faa4f9c0b, type: 2}
+  _animator: {fileID: 0}
   _transforms:
     upperLegL: {fileID: 1383217974755273681}
     upperLegR: {fileID: 1383217974125284927}
     lowerLegL: {fileID: 1383217973149431280}
     lowerLegR: {fileID: 1383217974128211525}
+--- !u!95 &6981865934370856975
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1383217973652769700}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 59350456a1b914eaaa49c55c7fca845a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1383217973967950508
 GameObject:
   m_ObjectHideFlags: 0
