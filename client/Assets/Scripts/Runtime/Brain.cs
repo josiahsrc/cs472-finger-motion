@@ -7,17 +7,17 @@ public class Brain : ScriptableObject
 {
     [SerializeField] private string _port = "5065"; 
 
-    BrainFitResponse fit(BrainFitRequest request)
+    public BrainFitResponse fit(BrainFitRequest request)
     {
         throw new System.NotImplementedException();
     }
 
-    BrainPredictResponse predict(BrainPredictRequest request)
+    public BrainPredictResponse predict(BrainPredictRequest request)
     {
         throw new System.NotImplementedException();
     }
 
-    BrainScoreResponse score(BrainScoreRequest request)
+    public BrainScoreResponse score(BrainScoreRequest request)
     {
         throw new System.NotImplementedException();
     }
