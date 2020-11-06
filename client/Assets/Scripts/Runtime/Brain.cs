@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Net.Sockets;
+using System.Net;
+using System.Threading;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,9 +15,11 @@ public class Brain : ScriptableObject
 {
     [SerializeField] private string _port = "5065";
 
-    private bool _isRunning = false;
+    private Thread _serverRequestThread = null;
+    private Thread _serverResponseThread = null;
+    private HashSet<IObserver> _observers = new HashSet<IObserver>();
 
-    public bool isRunning => _isRunning;
+    public bool isRunning => _serverRequestThread != null || _serverResponseThread != null;
 
     private void OnDisable()
     {
@@ -24,14 +30,82 @@ public class Brain : ScriptableObject
         }
     }
 
+    private void brainServerResponseLoop()
+    {
+        while (true)
+        {
+            Thread.Sleep(1000);
+        }
+    }
+
+    private void brainServerRequestLoop()
+    {
+        while (true)
+        {
+            Thread.Sleep(1000);
+        }
+    }
+
+    public void addObserver(IObserver observer)
+    {
+        _observers.Add(observer);
+    }
+
+    public void removeObserver(IObserver observer)
+    {
+        _observers.Remove(observer);
+    }
+
+    private void notifyObservers(Action<IObserver> callback)
+    {
+        foreach (var observer in _observers)
+        {
+            callback(observer);
+        }
+    }
+
     public void start()
     {
+        try
+        {
+            if (_serverResponseThread == null)
+            {
+                _serverResponseThread = new Thread(new ThreadStart(brainServerResponseLoop));
+                _serverResponseThread.IsBackground = true;
+                _serverResponseThread.Start();
+            }
 
+            if (_serverRequestThread == null)
+            {
+                _serverRequestThread = new Thread(new ThreadStart(brainServerRequestLoop));
+                _serverRequestThread.IsBackground = true;
+                _serverRequestThread.Start();
+            }
+        }
+        catch (Exception e)
+        {
+            stop();
+            throw e;
+        }
+
+        notifyObservers((o) => o.onStart());
     }
 
     public void stop()
     {
+        if (_serverResponseThread != null)
+        {
+            _serverResponseThread.Abort();
+            _serverResponseThread = null;
+        }
 
+        if (_serverRequestThread != null)
+        {
+            _serverRequestThread.Abort();
+            _serverRequestThread = null;
+        }
+
+        notifyObservers((o) => o.onStop());
     }
 
     public void saveModel(Request::SaveModel request)
