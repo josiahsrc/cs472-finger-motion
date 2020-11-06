@@ -18,13 +18,13 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
     private FitConfig _fitConfig = new FitConfig();
     private FitSession _fitSession = new FitSession();
 
-    private bool isRunning
+    private bool isSessionRunning
     {
         get => _dataGatherSession.isRunning || _fitSession.isRunning;
     }
 
     [MenuItem("Window/App/Training Interface")]
-    private static void init()
+    public static void showWindow()
     {
         TrainingWindow window = EditorWindow.GetWindow<TrainingWindow>();
         window.titleContent = new GUIContent("Training Interface");
@@ -60,7 +60,7 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         _windowScrollPos = GUILayout.BeginScrollView(_windowScrollPos);
 
         drawGeneralGUI();
-        EditorUtility.GUIEnabled(_brain && GUI.enabled, () =>
+        EditorUtility.GUIEnabled(_brain && _brain.isRunning && GUI.enabled, () =>
         {
             EditorGUILayout.Space();
             drawFittingGUI();
@@ -75,11 +75,10 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
     private void drawGeneralGUI()
     {
         GUILayout.Label("General", EditorStyles.boldLabel);
-        EditorUtility.GUIEnabled(!isRunning && GUI.enabled, () =>
+        EditorUtility.GUIEnabled(!isSessionRunning && GUI.enabled, () =>
         {
             var prevBrain = _brain;
             _brain = EditorGUILayout.ObjectField("Brain", _brain, typeof(Brain), true) as Brain;
-
             _debug = EditorGUILayout.Toggle("Debug", _debug);
 
             if (prevBrain != _brain)
@@ -91,6 +90,24 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
                 if (_brain != null)
                 {
                     _brain.addObserver(this);
+                }
+            }
+        });
+
+        EditorUtility.GUIEnabled(_brain && !isSessionRunning && GUI.enabled, () =>
+        {
+            if (!_brain || !_brain.isRunning)
+            {
+                if (GUILayout.Button("Start Brain Server"))
+                {
+                    _brain.start();
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Stop Brain Server"))
+                {
+                    _brain.stop();
                 }
             }
         });
@@ -111,9 +128,9 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         GUILayout.Label("Training", EditorStyles.boldLabel);
 
         var globalGUIEnabled = GUI.enabled;
-        EditorUtility.GUIEnabled((!isRunning || _fitSession.isRunning) && GUI.enabled, () =>
+        EditorUtility.GUIEnabled((!isSessionRunning || _fitSession.isRunning) && GUI.enabled, () =>
         {
-            GUI.enabled = !_fitSession.isRunning && !isRunning && globalGUIEnabled;
+            GUI.enabled = !_fitSession.isRunning && !isSessionRunning && globalGUIEnabled;
             EditorGUILayout.Space();
             if (GUILayout.Button("Fit (Overwrite)"))
             {
@@ -138,7 +155,7 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
     {
         GUILayout.Label("Data Gathering", EditorStyles.boldLabel);
 
-        EditorUtility.GUIEnabled(!isRunning && GUI.enabled, () =>
+        EditorUtility.GUIEnabled(!isSessionRunning && GUI.enabled, () =>
         {
             _dataGatherConfig.body = EditorGUILayout.ObjectField("Body", _dataGatherConfig.body,
                 typeof(BodyController), true) as BodyController;
@@ -167,7 +184,7 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         }
 
         EditorGUILayout.Space();
-        EditorUtility.GUIEnabled((!isRunning || _dataGatherSession.isRunning) && GUI.enabled, () =>
+        EditorUtility.GUIEnabled((!isSessionRunning || _dataGatherSession.isRunning) && GUI.enabled, () =>
         {
             if (GUILayout.Button(_dataGatherSession.isRunning ? "Stop" : "Gather Data"))
             {
@@ -190,7 +207,6 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         Debug.Assert(!_dataGatherSession.isRunning);
 
         EditorUtility.startAnimationMode();
-        startBrain();
         _dataGatherSession.remainingTime = 0;
         _dataGatherSession.status = "";
         _dataGatherSession.isRunning = true;
@@ -206,7 +222,6 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         }
 
         EditorUtility.stopAnimationMode();
-        stopBrain();
         _dataGatherSession.remainingTime = 0;
         _dataGatherSession.status = "";
         _dataGatherSession.isRunning = false;
@@ -288,22 +303,6 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         if (_debug)
         {
             Debug.LogError($"[Training] {msg}");
-        }
-    }
-
-    private void startBrain()
-    {
-        if (!_brain.isRunning)
-        {
-            _brain.start();
-        }
-    }
-
-    private void stopBrain()
-    {
-        if (_brain.isRunning)
-        {
-            _brain.stop();
         }
     }
 
