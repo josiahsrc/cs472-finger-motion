@@ -12,6 +12,7 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
 {
     private Brain _brain = null;
     private bool _debug = true;
+    private Logger _logger = new Logger("Training", true);
     private Vector2 _windowScrollPos = Vector2.zero;
     private DataGatherConfig _dataGatherConfig = new DataGatherConfig();
     private DataGatherSession _dataGatherSession = new DataGatherSession();
@@ -80,6 +81,7 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
             var prevBrain = _brain;
             _brain = EditorGUILayout.ObjectField("Brain", _brain, typeof(Brain), true) as Brain;
             _debug = EditorGUILayout.Toggle("Debug", _debug);
+            _logger.debug = _debug;
 
             if (prevBrain != _brain)
             {
@@ -282,73 +284,49 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         Repaint();
     }
 
-    private void logInfo(object msg)
-    {
-        if (_debug)
-        {
-            Debug.Log($"[Training] {msg}");
-        }
-    }
-
-    private void logWarning(object msg)
-    {
-        if (_debug)
-        {
-            Debug.LogWarning($"[Training] {msg}");
-        }
-    }
-
-    private void logError(object msg)
-    {
-        if (_debug)
-        {
-            Debug.LogError($"[Training] {msg}");
-        }
-    }
-
     void Brain.IObserver.onStart()
     {
-        logInfo("Server started");
+        _logger.info("Server started");
     }
 
     void Brain.IObserver.onStop()
     {
-        logInfo("Server stopped");
+        _logger.info("Server stopped");
     }
 
     void Brain.IObserver.onSaveModel(Response::SaveModel response)
     {
-        logInfo("Model saved");
+        _logger.info("Model saved");
     }
 
     void Brain.IObserver.onLoadModel(Response::LoadModel response)
     {
-        logInfo("Model loaded");
+        _logger.info("Model loaded");
     }
 
     void Brain.IObserver.onAppendInstance(Response::AppendInstance response)
     {
-        logInfo("Appended instance");
+        _logger.info("Appended instance");
     }
 
     void Brain.IObserver.onFit(Response::Fit response)
     {
-        logInfo("Fitted model");
+        _logger.info("Fitted model");
     }
 
     void Brain.IObserver.onPredict(Response::Predict response)
     {
-        logInfo("Predicted model");
+        _logger.info("Predicted model");
     }
 
     void Brain.IObserver.onScore(Response::Score response)
     {
-        logInfo("Scored model");
+        _logger.info("Scored model");
     }
 
     void Brain.IObserver.onLog(Response::Log response)
     {
-        logInfo($"Received log: {response.message}");
+        _logger.info($"Received log: {response.message}");
     }
 
     [Serializable]
