@@ -11,6 +11,19 @@ public class Brain : ScriptableObject
 {
     [SerializeField] private string _port = "5065";
 
+    private bool _isRunning = false;
+
+    public bool isRunning => _isRunning;
+
+    private void OnDisable()
+    {
+        if (isRunning)
+        {
+            Debug.LogWarning("Brain still running!");
+            stop();
+        }
+    }
+
     public void start()
     {
 
@@ -59,15 +72,15 @@ public class Brain : ScriptableObject
 
         void onSaveModel(Response::SaveModel response);
 
-        void onLoadModel(Response::SaveModel response);
+        void onLoadModel(Response::LoadModel response);
 
-        void onAppendInstance(Response::SaveModel response);
+        void onAppendInstance(Response::AppendInstance response);
 
-        void onFit(Response::SaveModel response);
+        void onFit(Response::Fit response);
 
-        void onPredict(Response::SaveModel response);
+        void onPredict(Response::Predict response);
 
-        void onScore(Response::SaveModel response);
+        void onScore(Response::Score response);
 
         void onLog(Response::Log response);
     }

@@ -177,7 +177,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _brain: {fileID: 11400000, guid: da5687a7857a840bc90f163faa4f9c0b, type: 2}
-  _animator: {fileID: 0}
+  _animator: {fileID: 6981865934370856975}
   _transforms:
     upperLegL: {fileID: 1383217974755273681}
     upperLegR: {fileID: 1383217974125284927}

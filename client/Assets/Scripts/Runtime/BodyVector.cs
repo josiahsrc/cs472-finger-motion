@@ -8,7 +8,6 @@ public class BodyVectorFloat : BodyVector<float>
     public BodyVectorFloat() { }
 }
 
-
 [System.Serializable]
 public class BodyVectorTransform : BodyVector<Transform>
 {

@@ -53,6 +53,6 @@ namespace BrainResponse
     [Serializable]
     public class Log : Base
     {
-
+        public string message;
     }
 }

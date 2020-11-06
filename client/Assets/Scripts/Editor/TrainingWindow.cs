@@ -5,9 +5,14 @@ using UnityEngine;
 using UnityEditor;
 using Unity.EditorCoroutines.Editor;
 
-[CustomEditor(typeof(Brain))]
-public class BrainEditor : Editor
+using Request = BrainRequest;
+using Response = BrainResponse;
+
+public class TrainingWindow : EditorWindow, Brain.IObserver
 {
+    private Brain _brain = null;
+    private bool _debug = true;
+    private Vector2 _windowScrollPos = Vector2.zero;
     private DataGatherConfig _dataGatherConfig = new DataGatherConfig();
     private DataGatherSession _dataGatherSession = new DataGatherSession();
     private FitConfig _fitConfig = new FitConfig();
@@ -18,11 +23,35 @@ public class BrainEditor : Editor
         get => _dataGatherSession.isRunning || _fitSession.isRunning;
     }
 
-    public override void OnInspectorGUI()
+    [MenuItem("Window/App/Training Interface")]
+    private static void init()
     {
+        TrainingWindow window = EditorWindow.GetWindow<TrainingWindow>();
+        window.titleContent = new GUIContent("Training Interface");
+        window.Show();
+    }
+
+    private void OnGUI()
+    {
+        _windowScrollPos = GUILayout.BeginScrollView(_windowScrollPos);
+
+        drawBrainGUI();
+        EditorGUILayout.Space();
         drawFittingGUI();
         EditorGUILayout.Space();
         drawDataGatherGUI();
+
+        GUILayout.EndScrollView();
+    }
+
+    private void drawBrainGUI()
+    {
+        GUILayout.Label("General Settings", EditorStyles.boldLabel);
+        EditorUtility.GUIEnabled(!isRunning, () =>
+        {
+            _brain = EditorGUILayout.ObjectField("Brain", _brain, typeof(Brain), true) as Brain;
+            _debug = EditorGUILayout.Toggle("Debug", _debug);
+        });
     }
 
     private void drawFittingGUI()
@@ -31,8 +60,9 @@ public class BrainEditor : Editor
 
         EditorUtility.GUIEnabled(!isRunning || _fitSession.isRunning, () =>
         {
+            GUI.enabled = !_fitSession.isRunning;
             EditorGUILayout.Space();
-            if (GUILayout.Button("Fit"))
+            if (GUILayout.Button("Fit (Overwrite)"))
             {
 
             }
@@ -42,6 +72,7 @@ public class BrainEditor : Editor
 
             }
 
+            GUI.enabled = _fitSession.isRunning;
             EditorGUILayout.Space();
             if (GUILayout.Button("Stop"))
             {
@@ -56,12 +87,16 @@ public class BrainEditor : Editor
 
         EditorUtility.GUIEnabled(!isRunning, () =>
         {
-            _dataGatherConfig.body = EditorGUILayout.ObjectField("Body", _dataGatherConfig.body, typeof(BodyController), true) as BodyController;
-            _dataGatherConfig.clip = EditorGUILayout.ObjectField("Clip", _dataGatherConfig.clip,
+            _dataGatherConfig.body = EditorGUILayout.ObjectField("Body", _dataGatherConfig.body,
+                typeof(BodyController), true) as BodyController;
+            _dataGatherConfig.animClip = EditorGUILayout.ObjectField("Clip", _dataGatherConfig.animClip,
                 typeof(AnimationClip), false) as AnimationClip;
+            _dataGatherConfig.dataFrame = EditorGUILayout.ObjectField("Data Frame", _dataGatherConfig.dataFrame,
+                typeof(BrainDataFrame), false) as BrainDataFrame;
             _dataGatherConfig.duration = EditorGUILayout.FloatField("Duration", _dataGatherConfig.duration);
             _dataGatherConfig.startDelay = EditorGUILayout.FloatField("Start Delay", _dataGatherConfig.startDelay);
-            _dataGatherConfig.snapshotInterval = EditorGUILayout.FloatField("Snapshot Interval", _dataGatherConfig.snapshotInterval);
+            _dataGatherConfig.snapshotInterval = EditorGUILayout.FloatField("Snapshot Interval",
+                _dataGatherConfig.snapshotInterval);
             _dataGatherConfig.speed = EditorGUILayout.FloatField("Speed", _dataGatherConfig.speed);
         });
 
@@ -98,7 +133,7 @@ public class BrainEditor : Editor
     private void gatherData_begin()
     {
         Debug.Assert(_dataGatherConfig.body != null);
-        Debug.Assert(_dataGatherConfig.clip != null);
+        Debug.Assert(_dataGatherConfig.animClip != null);
         Debug.Assert(!_dataGatherSession.isRunning);
 
         EditorUtility.startAnimationMode();
@@ -146,9 +181,9 @@ public class BrainEditor : Editor
                     output.stop = true;
                 }
 
-                var animT = (input.elapsedTime * _dataGatherConfig.speed) % _dataGatherConfig.clip.length;
+                var animT = (input.elapsedTime * _dataGatherConfig.speed) % _dataGatherConfig.animClip.length;
                 AnimationMode.BeginSampling();
-                AnimationMode.SampleAnimationClip(_dataGatherConfig.body.gameObject, _dataGatherConfig.clip, animT);
+                AnimationMode.SampleAnimationClip(_dataGatherConfig.body.gameObject, _dataGatherConfig.animClip, animT);
                 AnimationMode.EndSampling();
 
                 SceneView.RepaintAll();
@@ -177,11 +212,81 @@ public class BrainEditor : Editor
         Repaint();
     }
 
+    private void logInfo(object msg)
+    {
+        if (_debug)
+        {
+            Debug.Log($"[Training] {msg}");
+        }
+    }
+
+    private void logWarning(object msg)
+    {
+        if (_debug)
+        {
+            Debug.LogWarning($"[Training] {msg}");
+        }
+    }
+
+    private void logError(object msg)
+    {
+        if (_debug)
+        {
+            Debug.LogError($"[Training] {msg}");
+        }
+    }
+
+    void Brain.IObserver.onStart()
+    {
+        logInfo("Server started");
+    }
+
+    void Brain.IObserver.onStop()
+    {
+        logInfo("Server stopped");
+    }
+
+    void Brain.IObserver.onSaveModel(Response::SaveModel response)
+    {
+        logInfo("Model saved");
+    }
+
+    void Brain.IObserver.onLoadModel(Response::LoadModel response)
+    {
+        logInfo("Model loaded");
+    }
+
+    void Brain.IObserver.onAppendInstance(Response::AppendInstance response)
+    {
+        logInfo("Appended instance");
+    }
+
+    void Brain.IObserver.onFit(Response::Fit response)
+    {
+        logInfo("Fitted model");
+    }
+
+    void Brain.IObserver.onPredict(Response::Predict response)
+    {
+        logInfo("Predicted model");
+    }
+
+    void Brain.IObserver.onScore(Response::Score response)
+    {
+        logInfo("Scored model");
+    }
+
+    void Brain.IObserver.onLog(Response::Log response)
+    {
+        logInfo($"Received log: {response.message}");
+    }
+
     [Serializable]
     private class DataGatherConfig
     {
         public BodyController body = null;
-        public AnimationClip clip = null;
+        public AnimationClip animClip = null;
+        public BrainDataFrame dataFrame = null;
         public float duration = 10;
         public float startDelay = 3;
         public float snapshotInterval = 0.1f;
