@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Body : MonoBehaviour
+public class BodyController : MonoBehaviour
 {
     [SerializeField] private Brain _brain = null;
     [SerializeField] private Animator _animator = null;

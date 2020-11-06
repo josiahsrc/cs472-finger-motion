@@ -3,6 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
+public class BodyVectorFloat : BodyVector<float>
+{
+    public BodyVectorFloat() { }
+}
+
+
+[System.Serializable]
+public class BodyVectorTransform : BodyVector<Transform>
+{
+    public BodyVectorTransform() { }
+}
+
+[System.Serializable]
 public class BodyVector<T> : IEnumerable<T>
 {
     public T upperLegL = default(T);
@@ -23,7 +36,7 @@ public class BodyVector<T> : IEnumerable<T>
         }
     }
 
-    public T this[BodyLimb limb]
+    public T this[BodyPart limb]
     {
         get => getValue(limb);
         set => setValue(limb, value);
@@ -35,17 +48,17 @@ public class BodyVector<T> : IEnumerable<T>
         set => setValue(index, value);
     }
 
-    public T getValue(BodyLimb limb)
+    public T getValue(BodyPart limb)
     {
         switch (limb)
         {
-            case BodyLimb.upperLegL:
+            case BodyPart.upperLegL:
                 return upperLegL;
-            case BodyLimb.upperLegR:
+            case BodyPart.upperLegR:
                 return upperLegR;
-            case BodyLimb.lowerLegL:
+            case BodyPart.lowerLegL:
                 return lowerLegL;
-            case BodyLimb.lowerLegR:
+            case BodyPart.lowerLegR:
                 return lowerLegR;
             default:
                 throw new System.NotImplementedException(limb.ToString());
@@ -54,23 +67,23 @@ public class BodyVector<T> : IEnumerable<T>
 
     public T getValue(int index)
     {
-        return getValue((BodyLimb)index);
+        return getValue((BodyPart)index);
     }
 
-    public void setValue(BodyLimb limb, T value)
+    public void setValue(BodyPart limb, T value)
     {
         switch (limb)
         {
-            case BodyLimb.upperLegL:
+            case BodyPart.upperLegL:
                 upperLegL = value;
                 break;
-            case BodyLimb.upperLegR:
+            case BodyPart.upperLegR:
                 upperLegR = value;
                 break;
-            case BodyLimb.lowerLegL:
+            case BodyPart.lowerLegL:
                 lowerLegL = value;
                 break;
-            case BodyLimb.lowerLegR:
+            case BodyPart.lowerLegR:
                 lowerLegR = value;
                 break;
             default:
@@ -80,7 +93,7 @@ public class BodyVector<T> : IEnumerable<T>
 
     public void setValue(int index, T value)
     {
-        setValue((BodyLimb)index, value);
+        setValue((BodyPart)index, value);
     }
 
     public IEnumerator<T> GetEnumerator()

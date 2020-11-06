@@ -56,7 +56,7 @@ public class BrainEditor : Editor
 
         EditorUtility.GUIEnabled(!isRunning, () =>
         {
-            _dataGatherConfig.body = EditorGUILayout.ObjectField("Body", _dataGatherConfig.body, typeof(Body), true) as Body;
+            _dataGatherConfig.body = EditorGUILayout.ObjectField("Body", _dataGatherConfig.body, typeof(BodyController), true) as BodyController;
             _dataGatherConfig.clip = EditorGUILayout.ObjectField("Clip", _dataGatherConfig.clip,
                 typeof(AnimationClip), false) as AnimationClip;
             _dataGatherConfig.duration = EditorGUILayout.FloatField("Duration", _dataGatherConfig.duration);
@@ -180,7 +180,7 @@ public class BrainEditor : Editor
     [Serializable]
     private class DataGatherConfig
     {
-        public Body body = null;
+        public BodyController body = null;
         public AnimationClip clip = null;
         public float duration = 10;
         public float startDelay = 3;
@@ -200,7 +200,7 @@ public class BrainEditor : Editor
     [Serializable]
     private class FitConfig
     {
-        public Body body = null;
+        public BodyController body = null;
     }
 
     [Serializable]

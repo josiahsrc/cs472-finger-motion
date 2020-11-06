@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum BodyLimb
+public enum BodyPart
 {
     upperLegL = 0,
     upperLegR = 1,
