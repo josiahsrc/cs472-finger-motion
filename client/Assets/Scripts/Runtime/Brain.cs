@@ -18,16 +18,20 @@ public class Brain : ScriptableObject
     [SerializeField] private bool _debug = true;
 
     [Header("Network Settings")]
-    [SerializeField] private string _brainAddress = "localhost";
+    [SerializeField] private string _brainAddress = "127.0.0.1";
     [SerializeField] private int _brainPort = 8080;
+    [Space]
+    [SerializeField] private string _clientAddress = "127.0.0.1";
     [SerializeField] private int _clientPort = 5065;
 
-    private UDPThreadRunner _serverSendRunner = null;
-    private UDPThreadRunner _serverReadRunner = null;
+    private Thread _sendThread = null;
+    private Thread _recvThread = null;
+    private UDPSender _sendSocket = null;
+    private UDPReceiver _recvSocket = null;
     private HashSet<IObserver> _observers = new HashSet<IObserver>();
     private Logger _logger = new Logger("Brain");
 
-    public bool isRunning => _serverSendRunner != null || _serverReadRunner != null;
+    public bool isRunning => _sendThread != null || _recvThread != null;
 
     private void OnValidate()
     {
@@ -61,59 +65,6 @@ public class Brain : ScriptableObject
         }
     }
 
-    private UDPThreadRunner buildSendRunner()
-    {
-        var result = new UDPThreadRunner();
-
-        result.delay = ThreadDelay;
-        result.logger = new Logger("UDP Sender", _debug);
-
-        result.onStart = () =>
-        {
-            result.sock = UDPSocket.sender(_brainAddress, _brainPort);
-        };
-
-        result.onUpdate = () =>
-        {
-            // TODO: Send actual json
-            result.sock.send("Hello world\n");
-        };
-
-        result.onStop = () =>
-        {
-            result.sock.Dispose();
-        };
-
-        return result;
-    }
-
-    private UDPThreadRunner buildReadRunner()
-    {
-        var result = new UDPThreadRunner();
-
-        result.delay = ThreadDelay;
-        result.logger = new Logger("UDP Reader", _debug);
-
-        result.onStart = () =>
-        {
-            result.sock = UDPSocket.reader(_clientPort);
-        };
-
-        result.onUpdate = () =>
-        {
-            // TODO: Do something with response
-            var response = result.sock.read();
-            result.logger.info($"Received: {response}");
-        };
-
-        result.onStop = () =>
-        {
-            result.sock.Dispose();
-        };
-
-        return result;
-    }
-
     public string statusReport()
     {
         var builder = new StringBuilder();
@@ -124,22 +75,87 @@ public class Brain : ScriptableObject
         return builder.ToString();
     }
 
+    private void threadProcess_send()
+    {
+        _sendSocket.start();
+
+        while (true)
+        {
+            Thread.Sleep(ThreadDelay);
+
+            try
+            {
+                _sendSocket.send("Hello world!\n");
+            }
+            catch (ThreadAbortException e)
+            {
+                _logger.info(e.ToString());
+            }
+            catch (Exception e)
+            {
+                var builder = new StringBuilder();
+                builder.Append($"Unable to connect to the brain.\n");
+                builder.Append($"This probably means that there is no UDP server (brain) ");
+                builder.Append($"running on address={_brainAddress}, port={_brainPort}\n");
+                builder.Append(e.ToString());
+                _logger.error(builder);
+            }
+        }
+    }
+
+    private void threadProcess_recv()
+    {
+        _recvSocket.start();
+
+        while (true)
+        {
+            Thread.Sleep(ThreadDelay);
+
+            try
+            {
+                var response = _recvSocket.read();
+                _logger.info($"RECEIVED RESPONSE: {response}");
+            }
+            catch (ThreadAbortException e)
+            {
+                _logger.info(e.ToString());
+            }
+            catch (Exception e)
+            {
+                var builder = new StringBuilder();
+                builder.Append($"Unable to read client receiver.\n");
+                builder.Append(e.ToString());
+                _logger.error(builder);
+            }
+        }
+    }
+
     public void start()
     {
         Debug.Assert(!isRunning);
 
         try
         {
-            if (_serverSendRunner == null)
+            if (_sendThread == null)
             {
-                _serverSendRunner = buildSendRunner();
-                _serverSendRunner.start();
+                _sendSocket = new UDPSender(_brainAddress, _brainPort);
+
+                _sendThread = new Thread(new ThreadStart(threadProcess_send));
+                _sendThread.IsBackground = true;
+                _sendThread.Start();
+
+                _logger.info("Started UDP send thread");
             }
 
-            if (_serverReadRunner == null)
+            if (_recvThread == null)
             {
-                _serverReadRunner = buildReadRunner();
-                _serverReadRunner.start();
+                _recvSocket = new UDPReceiver(_clientAddress, _clientPort);
+
+                _recvThread = new Thread(new ThreadStart(threadProcess_recv));
+                _recvThread.IsBackground = true;
+                _recvThread.Start();
+
+                _logger.info("Started UDP recv thread");
             }
 
             notifyObservers((o) => o.onStart());
@@ -158,16 +174,26 @@ public class Brain : ScriptableObject
 
         try
         {
-            if (_serverSendRunner != null)
+            if (_sendThread != null)
             {
-                _serverSendRunner.stop();
-                _serverSendRunner = null;
+                _sendThread.Abort();
+                _sendThread = null;
+
+                _sendSocket.Dispose();
+                _sendSocket = null;
+
+                _logger.info("Stopped UDP send thread");
             }
 
-            if (_serverReadRunner != null)
+            if (_recvThread != null)
             {
-                _serverReadRunner.stop();
-                _serverReadRunner = null;
+                _recvThread.Abort();
+                _recvThread = null;
+
+                _recvSocket.Dispose();
+                _recvSocket = null;
+
+                _logger.info("Stopped UDP recv thread");
             }
 
             notifyObservers((o) => o.onStop());
@@ -228,69 +254,5 @@ public class Brain : ScriptableObject
         void onScore(Response::Score response);
 
         void onLog(Response::Log response);
-    }
-
-    private class UDPThreadRunner
-    {
-        public Logger logger = null;
-        public int delay = 0;
-        public UDPSocket sock = null;
-
-        public Action onStart = null;
-        public Action onUpdate = null;
-        public Action onStop = null;
-
-        private Thread _thread = null;
-
-        public bool isRunning { get; private set; } = false;
-
-        public void start()
-        {
-            Debug.Assert(!isRunning);
-
-            isRunning = true;
-            onStart?.Invoke();
-
-            _thread = new Thread(new ThreadStart(runLoop));
-            _thread.IsBackground = true;
-            _thread.Start();
-
-            logger?.info("Started thread");
-        }
-
-        public void stop()
-        {
-            Debug.Assert(isRunning);
-
-            _thread.Abort();
-            _thread = null;
-
-            isRunning = false;
-            onStop?.Invoke();
-
-            logger?.info("Stopped thread");
-        }
-
-        private void runLoop()
-        {
-            while (true)
-            {
-                try
-                {
-                    Thread.Sleep(delay);
-                    onUpdate?.Invoke();
-                }
-                catch (ThreadAbortException e)
-                {
-                    logger?.info(e.ToString());
-                }
-                catch (Exception e)
-                {
-                    logger?.error(e.ToString());
-                }
-            }
-
-            throw new NotSupportedException();
-        }
     }
 }

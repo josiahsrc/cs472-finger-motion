@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Brain
   m_EditorClassIdentifier: 
   _debug: 1
-  _brainAddress: localhost
+  _brainAddress: 127.0.0.1
   _brainPort: 8080
+  _clientAddress: 127.0.0.1
   _clientPort: 5065
