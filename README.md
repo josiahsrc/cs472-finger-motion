@@ -37,5 +37,5 @@ nc -u -lk 127.0.0.1 8080
 Send a message to a server over UDP to your localhost's (127.0.0.1) 5065 port:
 
 ```
-
+nc -u 127.0.0.1 5065 < some_file.txt
 ```
