@@ -6,15 +6,8 @@ using UnityEngine;
 
 public class UDPSocket : IDisposable
 {
-    private Logger _logger = new Logger(false, "UDPSocket");
     private Type _type = Type.none;
     private UdpClient _udpClient = null;
-
-    public bool debug
-    {
-        get => _logger.debug;
-        set => _logger.debug = value;
-    }
 
     private UDPSocket() { }
 
@@ -33,7 +26,6 @@ public class UDPSocket : IDisposable
         var sender = new IPEndPoint(IPAddress.Any, 0);
         var data = _udpClient.Receive(ref sender);
         var result = Encoding.ASCII.GetString(data);
-
         return result;
     }
 
@@ -42,7 +34,9 @@ public class UDPSocket : IDisposable
         var result = new UDPSocket();
 
         result._type = Type.sender;
-        result._udpClient = new UdpClient(address, port);
+
+        var client = new UdpClient(address, port);
+        result._udpClient = client;
 
         return result;
     }

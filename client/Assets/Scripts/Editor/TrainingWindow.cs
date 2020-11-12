@@ -61,6 +61,9 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         _windowScrollPos = GUILayout.BeginScrollView(_windowScrollPos);
 
         drawGeneralGUI();
+        EditorGUILayout.Space();
+        drawDebugGUI();
+
         EditorUtility.GUIEnabled(_brain && _brain.isRunning && GUI.enabled, () =>
         {
             EditorGUILayout.Space();
@@ -68,9 +71,41 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
             EditorGUILayout.Space();
             drawDataGatherGUI();
         });
-        
+
 
         GUILayout.EndScrollView();
+    }
+
+    private void drawDebugGUI()
+    {
+        GUILayout.Label("Debugging", EditorStyles.boldLabel);
+        _debug = EditorGUILayout.Toggle("Debug Mode", _debug);
+        _logger.debug = _debug;
+
+        if (_debug)
+        {
+            if (GUILayout.Button("Log Status Report"))
+            {
+                if (!_brain)
+                {
+                    _logger.info("No brain assigned");
+                }
+                else
+                {
+                    _logger.info(_brain.statusReport());
+                }
+            }
+
+            EditorGUILayout.Space();
+            {
+                var brainRunningMessage = _brain ? _brain.isRunning.ToString() : "N/A";
+                EditorGUILayout.HelpBox(
+                    $"INFO\n" +
+                    $"brain_running: {brainRunningMessage}",
+                    MessageType.Info
+                );
+            }
+        }
     }
 
     private void drawGeneralGUI()
@@ -80,8 +115,6 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         {
             var prevBrain = _brain;
             _brain = EditorGUILayout.ObjectField("Brain", _brain, typeof(Brain), true) as Brain;
-            _debug = EditorGUILayout.Toggle("Debug", _debug);
-            _logger.debug = _debug;
 
             if (prevBrain != _brain)
             {
@@ -113,16 +146,6 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
                 }
             }
         });
-
-        EditorGUILayout.Space();
-        {
-            var brainRunningMessage = _brain ? _brain.isRunning.ToString() : "N/A";
-            EditorGUILayout.HelpBox(
-                $"GENERAL INFO\n" +
-                $"brain_running: {brainRunningMessage}",
-                MessageType.Info
-            );
-        }
     }
 
     private void drawFittingGUI()

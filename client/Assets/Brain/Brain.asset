@@ -12,3 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2310ae61d4ce04e18801496677dabae4, type: 3}
   m_Name: Brain
   m_EditorClassIdentifier: 
+  _debug: 1
+  _brainAddress: localhost
+  _brainPort: 8080
+  _clientPort: 5065

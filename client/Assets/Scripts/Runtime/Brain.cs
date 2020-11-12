@@ -22,14 +22,12 @@ public class Brain : ScriptableObject
     [SerializeField] private int _brainPort = 8080;
     [SerializeField] private int _clientPort = 5065;
 
-    private UDPSocket _sockSend = null;
-    private UDPSocket _sockRecv = null;
-    private Thread _serverRequestThread = null;
-    private Thread _serverResponseThread = null;
+    private UDPThreadRunner _serverSendRunner = null;
+    private UDPThreadRunner _serverReadRunner = null;
     private HashSet<IObserver> _observers = new HashSet<IObserver>();
     private Logger _logger = new Logger("Brain");
 
-    public bool isRunning => _serverRequestThread != null || _serverResponseThread != null;
+    public bool isRunning => _serverSendRunner != null || _serverReadRunner != null;
 
     private void OnValidate()
     {
@@ -42,31 +40,6 @@ public class Brain : ScriptableObject
         {
             Debug.LogWarning("Brain still running!");
             stop();
-        }
-    }
-
-    private void brainServerReadLoop()
-    {
-        while (true)
-        {
-            Thread.Sleep(ThreadDelay);
-        }
-    }
-
-    private void brainServerSendLoop()
-    {
-        while (true)
-        {
-            Thread.Sleep(ThreadDelay);
-
-            try
-            {
-                _sockSend.send("Hello world");
-            }
-            catch (Exception e)
-            {
-                _logger.error(e.ToString());
-            }
         }
     }
 
@@ -88,70 +61,122 @@ public class Brain : ScriptableObject
         }
     }
 
+    private UDPThreadRunner buildSendRunner()
+    {
+        var result = new UDPThreadRunner();
+
+        result.delay = ThreadDelay;
+        result.logger = new Logger("UDP Sender", _debug);
+
+        result.onStart = () =>
+        {
+            result.sock = UDPSocket.sender(_brainAddress, _brainPort);
+        };
+
+        result.onUpdate = () =>
+        {
+            // TODO: Send actual json
+            result.sock.send("Hello world\n");
+        };
+
+        result.onStop = () =>
+        {
+            result.sock.Dispose();
+        };
+
+        return result;
+    }
+
+    private UDPThreadRunner buildReadRunner()
+    {
+        var result = new UDPThreadRunner();
+
+        result.delay = ThreadDelay;
+        result.logger = new Logger("UDP Reader", _debug);
+
+        result.onStart = () =>
+        {
+            result.sock = UDPSocket.reader(_clientPort);
+        };
+
+        result.onUpdate = () =>
+        {
+            // TODO: Do something with response
+            var response = result.sock.read();
+            result.logger.info($"Received: {response}");
+        };
+
+        result.onStop = () =>
+        {
+            result.sock.Dispose();
+        };
+
+        return result;
+    }
+
+    public string statusReport()
+    {
+        var builder = new StringBuilder();
+
+        builder.AppendLine($"Brain Status Report [{DateTime.Now.ToShortTimeString()}]");
+        builder.AppendLine($"Is running: {isRunning}");
+
+        return builder.ToString();
+    }
+
     public void start()
     {
+        Debug.Assert(!isRunning);
+
         try
         {
-            if (_sockSend == null)
+            if (_serverSendRunner == null)
             {
-                _sockSend = UDPSocket.sender(_brainAddress, _brainPort);
+                _serverSendRunner = buildSendRunner();
+                _serverSendRunner.start();
             }
 
-            if (_sockRecv == null)
+            if (_serverReadRunner == null)
             {
-                //_sockSend = UDPSocket.reader(_clientPort);
+                _serverReadRunner = buildReadRunner();
+                _serverReadRunner.start();
             }
 
-            if (_serverResponseThread == null)
-            {
-                _serverResponseThread = new Thread(new ThreadStart(brainServerReadLoop));
-                _serverResponseThread.IsBackground = true;
-                _serverResponseThread.Start();
-            }
-
-            if (_serverRequestThread == null)
-            {
-                _serverRequestThread = new Thread(new ThreadStart(brainServerSendLoop));
-                _serverRequestThread.IsBackground = true;
-                _serverRequestThread.Start();
-            }
+            notifyObservers((o) => o.onStart());
         }
         catch (Exception e)
         {
+            _logger.error(e.ToString());
             stop();
             throw e;
         }
-
-        notifyObservers((o) => o.onStart());
     }
 
     public void stop()
     {
-        if (_serverResponseThread != null)
-        {
-            _serverResponseThread.Abort();
-            _serverResponseThread = null;
-        }
+        Debug.Assert(isRunning);
 
-        if (_serverRequestThread != null)
+        try
         {
-            _serverRequestThread.Abort();
-            _serverRequestThread = null;
-        }
+            if (_serverSendRunner != null)
+            {
+                _serverSendRunner.stop();
+                _serverSendRunner = null;
+            }
 
-        if (_sockSend != null)
+            if (_serverReadRunner != null)
+            {
+                _serverReadRunner.stop();
+                _serverReadRunner = null;
+            }
+
+            notifyObservers((o) => o.onStop());
+        }
+        catch (Exception e)
         {
-            _sockSend.Dispose();
-            _sockSend = null;
+            _logger.error(e.ToString());
+            throw e;
         }
-
-        if (_sockRecv != null)
-        {
-            _sockRecv.Dispose();
-            _sockRecv = null;
-        }
-
-        notifyObservers((o) => o.onStop());
     }
 
     public void saveModel(Request::SaveModel request)
@@ -203,5 +228,69 @@ public class Brain : ScriptableObject
         void onScore(Response::Score response);
 
         void onLog(Response::Log response);
+    }
+
+    private class UDPThreadRunner
+    {
+        public Logger logger = null;
+        public int delay = 0;
+        public UDPSocket sock = null;
+
+        public Action onStart = null;
+        public Action onUpdate = null;
+        public Action onStop = null;
+
+        private Thread _thread = null;
+
+        public bool isRunning { get; private set; } = false;
+
+        public void start()
+        {
+            Debug.Assert(!isRunning);
+
+            isRunning = true;
+            onStart?.Invoke();
+
+            _thread = new Thread(new ThreadStart(runLoop));
+            _thread.IsBackground = true;
+            _thread.Start();
+
+            logger?.info("Started thread");
+        }
+
+        public void stop()
+        {
+            Debug.Assert(isRunning);
+
+            _thread.Abort();
+            _thread = null;
+
+            isRunning = false;
+            onStop?.Invoke();
+
+            logger?.info("Stopped thread");
+        }
+
+        private void runLoop()
+        {
+            while (true)
+            {
+                try
+                {
+                    Thread.Sleep(delay);
+                    onUpdate?.Invoke();
+                }
+                catch (ThreadAbortException e)
+                {
+                    logger?.info(e.ToString());
+                }
+                catch (Exception e)
+                {
+                    logger?.error(e.ToString());
+                }
+            }
+
+            throw new NotSupportedException();
+        }
     }
 }
