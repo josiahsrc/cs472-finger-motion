@@ -158,4 +158,18 @@ public class Brain : ScriptableObject
 
         void onLog(Response::Log response);
     }
+
+    /*
+     * Request:
+     * { 
+     *      command: "fit",
+     *      csv: "path-to-csv.csv", 
+     * }
+     * 
+     * Response:
+     * {
+     *      command: "fit",
+     *      accuracy: "",
+     * }
+     */
 }
