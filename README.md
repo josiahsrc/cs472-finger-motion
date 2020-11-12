@@ -6,15 +6,15 @@ Drive a virtual character's motion based on your finger movement.
 
 The project uses a client and a brain (server). The client uses the brain to predict output.
 
-### Client
+**Client**
 
 The virtual character simulator, built in Unity. It communicates with the python brain to drive the virtual character.
 
-### Brain
+**Brain**
 
 All machine learning code. This package uses tensorflow to compute outputs.
 
-### Client to brain communication
+**Client to brain communication**
 
 The client and brain each have two additional running threads
 - A response thread, which receives incoming packets
