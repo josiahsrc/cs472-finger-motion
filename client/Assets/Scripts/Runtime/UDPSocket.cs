@@ -4,15 +4,11 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 
-public class UDPSocket
+public class UDPSocket : IDisposable
 {
-    private const int BufferSize = 8 * 1024;
-
     private Logger _logger = new Logger(false, "UDPSocket");
-    private Socket _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-    private State _state = new State();
-    private EndPoint epFrom = new IPEndPoint(IPAddress.Any, 0);
-    private AsyncCallback _recv = null;
+    private Type _type = Type.none;
+    private UdpClient _udpClient = null;
 
     public bool debug
     {
@@ -20,43 +16,63 @@ public class UDPSocket
         set => _logger.debug = value;
     }
 
-    public void server(string address, int port)
+    private UDPSocket() { }
+
+    public void send(string value)
     {
-        _socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.ReuseAddress, true);
-        _socket.Bind(new IPEndPoint(IPAddress.Parse(address), port));
-        receive();
+        Debug.Assert(this._type == Type.sender);
+
+        var data = Encoding.ASCII.GetBytes(value);
+        _udpClient.Send(data, data.Length);
     }
 
-    public void client(string address, int port)
+    public string read()
     {
-        _socket.Connect(IPAddress.Parse(address), port);
-        receive();
+        Debug.Assert(this._type == Type.reader);
+
+        var sender = new IPEndPoint(IPAddress.Any, 0);
+        var data = _udpClient.Receive(ref sender);
+        var result = Encoding.ASCII.GetString(data);
+
+        return result;
     }
 
-    public void send(string text)
+    public static UDPSocket sender(string address, int port)
     {
-        byte[] data = Encoding.ASCII.GetBytes(text);
-        _socket.BeginSend(data, 0, data.Length, SocketFlags.None, (ar) =>
+        var result = new UDPSocket();
+
+        result._type = Type.sender;
+        result._udpClient = new UdpClient(address, port);
+
+        return result;
+    }
+
+    public static UDPSocket reader(int port)
+    {
+        var result = new UDPSocket();
+
+        result._type = Type.reader;
+
+        var endPoint = new IPEndPoint(IPAddress.Any, port);
+        result._udpClient = new UdpClient(endPoint);
+
+        return result;
+    }
+
+    public void Dispose()
+    {
+        if (_udpClient != null)
         {
-            State so = (State)ar.AsyncState;
-            int bytes = _socket.EndSend(ar);
-            _logger.info($"SEND: {bytes}, {text}");
-        }, _state);
+            _udpClient.Close();
+            _udpClient.Dispose();
+            _udpClient = null;
+        }
     }
 
-    private void receive()
+    public enum Type
     {
-        _socket.BeginReceiveFrom(_state.buffer, 0, BufferSize, SocketFlags.None, ref epFrom, _recv = (ar) =>
-        {
-            State so = (State)ar.AsyncState;
-            int bytes = _socket.EndReceiveFrom(ar, ref epFrom);
-            _socket.BeginReceiveFrom(so.buffer, 0, BufferSize, SocketFlags.None, ref epFrom, _recv, so);
-            _logger.info($"RECV: {epFrom.ToString()}: {bytes}, {Encoding.ASCII.GetString(so.buffer, 0, bytes)}");
-        }, _state);
-    }
-
-    private class State
-    {
-        public byte[] buffer = new byte[BufferSize];
+        none,
+        sender,
+        reader,
     }
 }

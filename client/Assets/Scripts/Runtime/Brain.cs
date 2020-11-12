@@ -13,13 +13,28 @@ using Response = BrainResponse;
 [CreateAssetMenu(fileName = "Brain", menuName = "App/Brain")]
 public class Brain : ScriptableObject
 {
-    [SerializeField] private string _port = "5065";
+    private const int ThreadDelay = 3000;
 
+    [SerializeField] private bool _debug = true;
+
+    [Header("Network Settings")]
+    [SerializeField] private string _brainAddress = "localhost";
+    [SerializeField] private int _brainPort = 8080;
+    [SerializeField] private int _clientPort = 5065;
+
+    private UDPSocket _sockSend = null;
+    private UDPSocket _sockRecv = null;
     private Thread _serverRequestThread = null;
     private Thread _serverResponseThread = null;
     private HashSet<IObserver> _observers = new HashSet<IObserver>();
+    private Logger _logger = new Logger("Brain");
 
     public bool isRunning => _serverRequestThread != null || _serverResponseThread != null;
+
+    private void OnValidate()
+    {
+        _logger.debug = _debug;
+    }
 
     private void OnDisable()
     {
@@ -30,19 +45,28 @@ public class Brain : ScriptableObject
         }
     }
 
-    private void brainServerResponseLoop()
+    private void brainServerReadLoop()
     {
         while (true)
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(ThreadDelay);
         }
     }
 
-    private void brainServerRequestLoop()
+    private void brainServerSendLoop()
     {
         while (true)
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(ThreadDelay);
+
+            try
+            {
+                _sockSend.send("Hello world");
+            }
+            catch (Exception e)
+            {
+                _logger.error(e.ToString());
+            }
         }
     }
 
@@ -68,16 +92,26 @@ public class Brain : ScriptableObject
     {
         try
         {
+            if (_sockSend == null)
+            {
+                _sockSend = UDPSocket.sender(_brainAddress, _brainPort);
+            }
+
+            if (_sockRecv == null)
+            {
+                //_sockSend = UDPSocket.reader(_clientPort);
+            }
+
             if (_serverResponseThread == null)
             {
-                _serverResponseThread = new Thread(new ThreadStart(brainServerResponseLoop));
+                _serverResponseThread = new Thread(new ThreadStart(brainServerReadLoop));
                 _serverResponseThread.IsBackground = true;
                 _serverResponseThread.Start();
             }
 
             if (_serverRequestThread == null)
             {
-                _serverRequestThread = new Thread(new ThreadStart(brainServerRequestLoop));
+                _serverRequestThread = new Thread(new ThreadStart(brainServerSendLoop));
                 _serverRequestThread.IsBackground = true;
                 _serverRequestThread.Start();
             }
@@ -103,6 +137,18 @@ public class Brain : ScriptableObject
         {
             _serverRequestThread.Abort();
             _serverRequestThread = null;
+        }
+
+        if (_sockSend != null)
+        {
+            _sockSend.Dispose();
+            _sockSend = null;
+        }
+
+        if (_sockRecv != null)
+        {
+            _sockRecv.Dispose();
+            _sockRecv = null;
         }
 
         notifyObservers((o) => o.onStop());
@@ -158,18 +204,4 @@ public class Brain : ScriptableObject
 
         void onLog(Response::Log response);
     }
-
-    /*
-     * Request:
-     * { 
-     *      command: "fit",
-     *      csv: "path-to-csv.csv", 
-     * }
-     * 
-     * Response:
-     * {
-     *      command: "fit",
-     *      accuracy: "",
-     * }
-     */
 }

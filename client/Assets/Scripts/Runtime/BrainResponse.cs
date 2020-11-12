@@ -8,13 +8,13 @@ namespace BrainResponse
     [Serializable]
     public abstract class Base
     {
-        [SerializeField] private string _type;
+        [SerializeField] private string type;
 
-        public string type => _type;
+        public string typeID => type;
 
         public Base(string type)
         {
-            this._type = type;
+            this.type = type;
         }
     }
 
