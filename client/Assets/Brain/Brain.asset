@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Brain
   m_EditorClassIdentifier: 
   _debug: 1
-  _brainAddress: 127.0.0.1
-  _brainPort: 8080
-  _clientAddress: 127.0.0.1
-  _clientPort: 5065
+  _threadDelay: 10
+  _sendAddress: 127.0.0.1
+  _sendPort: 8080
+  _recvAddress: 127.0.0.1
+  _recvPort: 5065
