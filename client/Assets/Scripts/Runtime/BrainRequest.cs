@@ -5,8 +5,18 @@ using UnityEngine;
 
 namespace BrainRequest
 {
+    public static class TypeIDs
+    {
+        public const string saveModel = "save_model";
+        public const string loadModel = "load_model";
+        public const string appendInstance = "append_instance";
+        public const string fit = "fit";
+        public const string predict = "predict";
+        public const string score = "score";
+    }
+
     [Serializable]
-    public abstract class Base
+    public class Base
     {
         [SerializeField] private string type;
 
@@ -21,36 +31,41 @@ namespace BrainRequest
     [Serializable]
     public class SaveModel : Base
     {
-        public SaveModel() : base("save_model") { }
+        public SaveModel() : base(TypeIDs.saveModel) { }
     }
 
     [Serializable]
     public class LoadModel : Base
     {
-        public LoadModel() : base("load_model") { }
+        public LoadModel() : base(TypeIDs.loadModel) { }
     }
 
     [Serializable]
     public class AppendInstance : Base
     {
-        public AppendInstance() : base("append_instance") { }
+        public string csvPath;
+        public float[] outputs;
+
+        public AppendInstance() : base(TypeIDs.appendInstance) { }
     }
 
     [Serializable]
     public class Fit : Base
     {
-        public Fit() : base("fit") { }
+        public string[] csvPaths;
+
+        public Fit() : base(TypeIDs.fit) { }
     }
 
     [Serializable]
     public class Predict : Base
     {
-        public Predict() : base("predict") { }
+        public Predict() : base(TypeIDs.predict) { }
     }
 
     [Serializable]
     public class Score : Base
     {
-        public Score() : base("score") { }
+        public Score() : base(TypeIDs.score) { }
     }
 }

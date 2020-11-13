@@ -105,6 +105,30 @@ public class BodyVector<T> : IEnumerable<T>
         return GetEnumerator();
     }
 
+    public List<T> asList()
+    {
+        var result = new List<T>(length);
+
+        foreach (var value in values)
+        {
+            result.Add(value);
+        }
+
+        return result;
+    }
+
+    public T[] asArray()
+    {
+        var result = new T[length];
+
+        for (int i = 0; i < length; ++i)
+        {
+            result[i] = this[i];   
+        }
+
+        return result;
+    }
+
     public BodyVector<T> copy()
     {
         var result = new BodyVector<T>();

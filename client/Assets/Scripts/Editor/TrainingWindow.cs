@@ -3,19 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 using Unity.EditorCoroutines.Editor;
 
 using Request = BrainRequest;
 using Response = BrainResponse;
 
-public class TrainingWindow : EditorWindow, Brain.IObserver
+/// <summary>
+/// A training interface.
+///
+/// TODO: Decompose this class, it's pretty hefty.
+/// </summary>
+public class TrainingWindow : EditorWindow, Brain.IObserver, Brain.ICoroutineDriver
 {
+    private EditorCoroutine _brainSpinRoutine = null;
     private Brain _brain = null;
     private bool _debug = true;
-    private Logger _logger = new Logger("Training", true);
+    private Logger _logger = new Logger("Training Window", true);
     private Vector2 _windowScrollPos = Vector2.zero;
+
     private DataGatherConfig _dataGatherConfig = new DataGatherConfig();
     private DataGatherSession _dataGatherSession = new DataGatherSession();
+
+    private EditorUtility.ReorderableObjectList<BrainDataFrame> _fitRoDataFrameList = null;
     private FitConfig _fitConfig = new FitConfig();
     private FitSession _fitSession = new FitSession();
 
@@ -32,27 +42,28 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         window.Show();
     }
 
-    private void Awake()
+    private void OnEnable()
     {
+        _fitRoDataFrameList = new EditorUtility.ReorderableObjectList<BrainDataFrame>(_fitConfig.dataFrames);
+        _fitRoDataFrameList.headerName = "Data Frames";
+        _fitRoDataFrameList.itemName = "Data Frame";
+        _fitRoDataFrameList.enable();
+
         if (_brain != null)
         {
             _brain.addObserver(this);
+            _brain.setCoroutineDriver(this);
         }
     }
 
-    private void OnFocus()
+    private void OnDisable()
     {
-        if (_brain != null)
-        {
-            _brain.addObserver(this);
-        }
-    }
+        _fitRoDataFrameList.disable();
 
-    private void OnDestroy()
-    {
         if (_brain != null)
         {
             _brain.removeObserver(this);
+            _brain.setCoroutineDriver(null);
         }
     }
 
@@ -121,10 +132,12 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
                 if (prevBrain != null)
                 {
                     prevBrain.removeObserver(this);
+                    prevBrain.setCoroutineDriver(null);
                 }
                 if (_brain != null)
                 {
                     _brain.addObserver(this);
+                    _brain.setCoroutineDriver(this);
                 }
             }
         });
@@ -156,22 +169,21 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         EditorUtility.GUIEnabled((!isSessionRunning || _fitSession.isRunning) && GUI.enabled, () =>
         {
             GUI.enabled = !_fitSession.isRunning && !isSessionRunning && globalGUIEnabled;
+
+            _fitRoDataFrameList.drawLayout();
+
             EditorGUILayout.Space();
-            if (GUILayout.Button("Fit (Overwrite)"))
+            if (GUILayout.Button("Fit"))
             {
+                var req = new Request.Fit();
 
-            }
+                req.csvPaths = new string[_fitConfig.dataFrames.Count];
+                for (int i = 0; i < req.csvPaths.Length; ++i)
+                {
+                    req.csvPaths[i] = _fitConfig.dataFrames[i].csvFullPath;
+                }
 
-            if (GUILayout.Button("Fit (Append)"))
-            {
-
-            }
-
-            GUI.enabled = _fitSession.isRunning && globalGUIEnabled;
-            EditorGUILayout.Space();
-            if (GUILayout.Button("Stop"))
-            {
-                gatherData_stop();
+                _brain.fit(req);
             }
         });
     }
@@ -260,6 +272,8 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         var threshGatherData = _dataGatherConfig.duration + threshStart;
         var durationTotal = threshGatherData;
 
+        var dynamicThreshSnapshotInterval = 0.0f;
+
         var futureConfig = new FutureRoutine.Config();
         futureConfig.duration = durationTotal;
 
@@ -296,6 +310,16 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
                 _dataGatherSession.remainingTime = threshGatherData - input.elapsedTime;
                 _dataGatherSession.status = "Gathering data";
                 updateAnimationClip();
+
+                if (input.elapsedTime > dynamicThreshSnapshotInterval)
+                {
+                    var request = new Request.AppendInstance();
+                    request.csvPath = _dataGatherConfig.dataFrame.csvFullPath;
+                    request.outputs = _dataGatherConfig.body.takeSnapshot().asArray();
+                    _brain.appendInstance(request);
+
+                    dynamicThreshSnapshotInterval = input.elapsedTime + _dataGatherConfig.snapshotInterval;
+                }
             }
 
             return output;
@@ -317,39 +341,51 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
         _logger.info("Server stopped");
     }
 
-    void Brain.IObserver.onSaveModel(Response::SaveModel response)
+    void Brain.IObserver.onSaveModel(Response.SaveModel response)
     {
         _logger.info("Model saved");
     }
 
-    void Brain.IObserver.onLoadModel(Response::LoadModel response)
+    void Brain.IObserver.onLoadModel(Response.LoadModel response)
     {
         _logger.info("Model loaded");
     }
 
-    void Brain.IObserver.onAppendInstance(Response::AppendInstance response)
+    void Brain.IObserver.onAppendInstance(Response.AppendInstance response)
     {
         _logger.info("Appended instance");
     }
 
-    void Brain.IObserver.onFit(Response::Fit response)
+    void Brain.IObserver.onFit(Response.Fit response)
     {
         _logger.info("Fitted model");
+        _fitSession.isRunning = false;
     }
 
-    void Brain.IObserver.onPredict(Response::Predict response)
+    void Brain.IObserver.onPredict(Response.Predict response)
     {
         _logger.info("Predicted model");
     }
 
-    void Brain.IObserver.onScore(Response::Score response)
+    void Brain.IObserver.onScore(Response.Score response)
     {
         _logger.info("Scored model");
     }
 
-    void Brain.IObserver.onLog(Response::Log response)
+    void Brain.IObserver.onLog(Response.Log response)
     {
         _logger.info($"Received log: {response.message}");
+    }
+
+    void Brain.ICoroutineDriver.startSpinRoutine(IEnumerator routine)
+    {
+        _brainSpinRoutine = EditorCoroutineUtility.StartCoroutine(routine, this);
+    }
+
+    void Brain.ICoroutineDriver.stopSpinRoutine()
+    {
+        EditorCoroutineUtility.StopCoroutine(_brainSpinRoutine);
+        _brainSpinRoutine = null;
     }
 
     [Serializable]
@@ -376,7 +412,7 @@ public class TrainingWindow : EditorWindow, Brain.IObserver
     [Serializable]
     private class FitConfig
     {
-        public BodyController body = null;
+        public List<BrainDataFrame> dataFrames = new List<BrainDataFrame>();
     }
 
     [Serializable]
