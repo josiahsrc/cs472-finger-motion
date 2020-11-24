@@ -11,6 +11,7 @@ using UnityEngine;
 using Request = BrainRequest;
 using Response = BrainResponse;
 
+
 [CreateAssetMenu(fileName = "Brain", menuName = "App/Brain")]
 public class Brain : ScriptableObject
 {

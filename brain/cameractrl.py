@@ -4,24 +4,29 @@ import imutils
 
 class CameraCtrl():
 #basic camera controller. this simply initalizes the camera and passes on the video information
+    def __init__(self):
+        self.cap = cv2.VideoCapture(0)
 
-    self.cap = cv2.Videoture(0)
+        self.greenUpper = np.array([83, 255, 255])
+        self.greenLower = np.array([59, 38, 171])
 
-    self.greenUpper = np.array([83, 255, 255])
-    self.greenLower = np.array([59, 38, 171])
-
-    self.orangeUpper = np.array([10,255,255])
-    self.orangeLower = np.array([0,101,177])
+        self.orangeUpper = np.array([10,255,255])
+        self.orangeLower = np.array([0,101,177])
 
 
-    self.blueUpper = np.array([115,255,255])
-    self.blueLower = np.array([107,174,138])
+        self.blueUpper = np.array([115,255,255])
+        self.blueLower = np.array([107,174,138])
 
-    self.purpleUpper = np.array([140,255,213])
-    self.purpleLower = np.array([123,128,109])
+        self.purpleUpper = np.array([140,255,213])
+        self.purpleLower = np.array([123,128,109])
 
-    self.pinkUpper = np.array([179,255,255])
-    self.pinkLower = np.array([148,92,107])
+        self.pinkUpper = np.array([179,255,255])
+        self.pinkLower = np.array([148,92,107])
+
+    def __del__(self):
+        self.cap.release()
+        cv2.destroyAllWindows()
+
 
     def createMask(self, img, lower, upper):
         mask = cv2.inRange(img, lower, upper)
@@ -51,7 +56,7 @@ class CameraCtrl():
 
         if not success:
             print("no camera detected, closing....")
-            break
+            exit()
         return frame
 
 

@@ -15,6 +15,6 @@ MonoBehaviour:
   _debug: 1
   _threadDelay: 10
   _sendAddress: 127.0.0.1
-  _sendPort: 8080
+  _sendPort: 5002
   _recvAddress: 127.0.0.1
   _recvPort: 5065
