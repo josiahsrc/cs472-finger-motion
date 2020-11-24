@@ -16,11 +16,11 @@ def appendInstance(reqTuple):
   prevPoints = reqTuple[3]
 
   #grab the filepath to write to,
-  filepath = request.csvPath
+  filepath = request['csvPath']
 
   #calculate delta angles
-  angles = np.copy(request.outputs)
-  prev_angles = np.copy(prevRequest.outputs)
+  angles = np.copy(request['outputs'])
+  prev_angles = np.copy(prevRequest['outputs'])
   delta_angles = angles - prev_angles
 
   #calculate delta points
@@ -30,9 +30,10 @@ def appendInstance(reqTuple):
       delta_points.append(None)
     
     else:
+      point1 = np.array(point1)
+      point2 = np.array(point2)
       delta = point1 - point2
       delta_points.append(delta)
-
 
   #now they need to be writen to the file
   print('delta angles:', delta_angles)
@@ -66,7 +67,7 @@ def handleRequests(reqQ, respQ):
   
   while True:
     reqTuple = reqQ.get()
-    requestType = reqTuple[0].type
+    requestType = reqTuple[0]['type']
     resp = ()
 
     if requestType == 'append_instance':
@@ -85,9 +86,6 @@ def handleRequests(reqQ, respQ):
       break
 
     respQ.put(resp)
-
-
-    
 
 
 def handleResponses(respQ):
