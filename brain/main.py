@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 from multiprocessing import Process, Queue
 import json
+import csv
+import os.path
 
 
 def appendInstance(reqTuple):
@@ -17,6 +19,7 @@ def appendInstance(reqTuple):
 
   #grab the filepath to write to,
   filepath = request['csvPath']
+  file_basename = os.path.basename(filepath)
 
   #calculate delta angles
   angles = np.copy(request['outputs'])
@@ -35,9 +38,26 @@ def appendInstance(reqTuple):
       delta = point1 - point2
       delta_points.append(delta)
 
+  # Clean up delta_points
+  new_points = []
+  for point in delta_points:
+    if point is not None:
+      new_points.append(point[0])
+      new_points.append(point[1])
+    else:
+      new_points.append(None)
+      new_points.append(None)
+
+  # Combining into one row
+  final_row = np.concatenate((new_points, delta_angles), axis=0)
+
   #now they need to be writen to the file
-  print('delta angles:', delta_angles)
-  print('delta positions:', delta_points)
+  # print('delta angles:', delta_angles)
+  # print('delta positions:', delta_points)
+
+  with open(file_basename, 'a') as fd:
+    writer = csv.writer(fd)
+    writer.writerow(final_row)
 
   #return the response
   return {'type': 'append_instance',
@@ -64,7 +84,9 @@ def score():
 
 def handleRequests(reqQ, respQ):
   #Request thread handler
-  
+
+
+  print('Will start handeling request')
   while True:
     reqTuple = reqQ.get()
     requestType = reqTuple[0]['type']
@@ -99,7 +121,6 @@ def main():
   HOST, PORT = "127.0.0.1", 5002
   reqQ = Queue(1024)
   respQ = Queue(1024)
-
 
   RequestProcess = Process(target=handleRequests, args=(reqQ,respQ,))
   ResponseProcess = Process(target=handleResponses, args=(respQ,))
