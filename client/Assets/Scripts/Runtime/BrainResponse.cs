@@ -52,6 +52,8 @@ namespace BrainResponse
     [Serializable]
     public class Fit : Base
     {
+        public string message;
+
         public Fit() : base(TypeIDs.fit) { }
     }
 

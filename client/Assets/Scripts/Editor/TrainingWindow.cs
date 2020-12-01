@@ -170,7 +170,7 @@ public class TrainingWindow : EditorWindow, Brain.IObserver, Brain.ICoroutineDri
         {
             GUI.enabled = !_fitSession.isRunning && !isSessionRunning && globalGUIEnabled;
 
-            _fitRoDataFrameList.drawLayout();
+            _fitRoDataFrameList.drawLayout(); 
 
             EditorGUILayout.Space();
             if (GUILayout.Button("Fit"))
@@ -353,12 +353,12 @@ public class TrainingWindow : EditorWindow, Brain.IObserver, Brain.ICoroutineDri
 
     void Brain.IObserver.onAppendInstance(Response.AppendInstance response)
     {
-        _logger.info("Appended instance");
+        _logger.info($"Appended instance: {response.message}");
     }
 
     void Brain.IObserver.onFit(Response.Fit response)
     {
-        _logger.info("Fitted model");
+        _logger.info($"Fitted model: {response.message}");
         _fitSession.isRunning = false;
     }
 
