@@ -16,7 +16,7 @@ N_FEATURES = 10
 N_LABELS = 4
 
 # Prepare the data
-data = pd.read_csv('data/walk00_raw.csv').values
+data = pd.read_csv('data/walk00_raw_points.csv').values
 X, y = data[:, :N_FEATURES], data[:, N_FEATURES:]
 X, y = np.nan_to_num(X), y
 

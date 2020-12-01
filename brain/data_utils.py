@@ -8,6 +8,12 @@ from sklearn.preprocessing import normalize
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 
+def score_avg_mse(model, X_test, y_test):
+    tot = 0.0
+    for _ in range(10):
+        tot += model.score(X_test, y_test)
+    return tot / 10
+
 # Saves a numpy array to a CSV file, overwriting
 # anything that was there.
 def save_np_array_to_csv(array, path2csv):

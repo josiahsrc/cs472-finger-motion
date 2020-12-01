@@ -14,9 +14,9 @@ argc = len(sys.argv)
 argv = sys.argv
 
 if argc != 3:
-    print('Usage: python databuilder_vector.py <path_to_raw_dataset.csv> <path_to_output_dataset.csv>')
+    print('Usage: python databuilder_vectors_and_mags.py <path_to_raw_dataset.csv> <path_to_output_dataset.csv>')
     print('')
-    print('Example: python databuilder_vector.py data/walk00_raw.csv data/walk00_vector.csv')
+    print('Example: python databuilder_vectors_and_mags.py data/walk00_raw_points.csv data/walk00_vectors_and_mags.csv')
     exit(1)
     
 arg_idataset = argv[1]

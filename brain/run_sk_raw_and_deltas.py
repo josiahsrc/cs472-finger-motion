@@ -21,11 +21,11 @@ from sklearn.preprocessing import normalize
 # of the screen (its hard to keep your hand in the same
 # spot when training).
 
-N_FEATURES = 10
+N_FEATURES = 20
 N_LABELS = 4
 
 # Prepare the data
-data = pd.read_csv('data/walk00_raw_points.csv').values
+data = pd.read_csv('data/walk00_raw_and_deltas.csv').values
 X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
 
 # Split train and test
@@ -33,7 +33,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random
 
 # Build the model
 model = MLPRegressor(
-    hidden_layer_sizes=(16, 42,),
+    hidden_layer_sizes=(32, 42,),
     activation='relu',
     solver='adam',
 )
