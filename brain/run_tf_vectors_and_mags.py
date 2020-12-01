@@ -8,12 +8,12 @@ from sklearn.model_selection import train_test_split
 
 # Report:
 
-N_FEATURES = 10
+N_FEATURES = 12
 N_LABELS = 4
 
 # Prepare the data
-data = pd.read_csv('data/walk00_raw_points.csv').values
-X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
+data = pd.read_csv('data/walk00_vectors_and_mags.csv').values
+X, y = data[:, :N_FEATURES], data[:, N_FEATURES:]
 
 # Split train and test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)

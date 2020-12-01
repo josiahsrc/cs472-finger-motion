@@ -8,11 +8,11 @@ from sklearn.model_selection import train_test_split
 
 # Report:
 
-N_FEATURES = 10
+N_FEATURES = 20
 N_LABELS = 4
 
 # Prepare the data
-data = pd.read_csv('data/walk00_raw_points.csv').values
+data = pd.read_csv('data/walk00_raw_and_deltas.csv').values
 X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
 
 # Split train and test
@@ -22,8 +22,8 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random
 model = tf.keras.models.Sequential([
     tf.keras.Input(shape=(N_FEATURES,), name="input"),
     tf.keras.layers.LayerNormalization(axis=1 , center=True , scale=True),
-    tf.keras.layers.Dense(32, activation='relu', name='hidden_dense_1'),
-    tf.keras.layers.Dense(42, activation='relu', name='hidden_dense_2'),
+    tf.keras.layers.Dense(48, activation='relu', name='hidden_dense_1'),
+    tf.keras.layers.Dense(64, activation='relu', name='hidden_dense_2'),
     tf.keras.layers.Dense(N_LABELS, activation='softmax', name='output')
 ])
 
