@@ -13,10 +13,10 @@ N_LABELS = 4
 
 # Prepare the data
 data = pd.read_csv('data/walk00_raw_points.csv').values
-X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
+X, y = dutils.prepare_data_imputed(data[:, :N_FEATURES], data[:, N_FEATURES:])
 
 # Split train and test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
 # Build the model
 model = tf.keras.models.Sequential([

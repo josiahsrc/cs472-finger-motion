@@ -16,7 +16,7 @@ data = pd.read_csv('data/walk00_vectors_and_mags.csv').values
 X, y = data[:, :N_FEATURES], data[:, N_FEATURES:]
 
 # Split train and test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
 # Build the model
 model = MLPRegressor(

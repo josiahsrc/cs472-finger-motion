@@ -204,6 +204,8 @@ public class Brain : ScriptableObject
                 continue;
             }
 
+            _logger.info(json);
+
             try
             {
                 var baseResponse = JsonUtility.FromJson<Response.Base>(json);

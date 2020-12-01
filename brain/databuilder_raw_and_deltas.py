@@ -60,11 +60,11 @@ for i in range(X.shape[0]):
     
     # Row to append
     row = np.array([
-        prev_pt_grn[0], prev_pt_grn[1],
-        prev_pt_blu[0], prev_pt_blu[1],
-        prev_pt_prp[0], prev_pt_prp[1],
-        prev_pt_org[0], prev_pt_org[1],
-        prev_pt_pnk[0], prev_pt_pnk[1],
+        diff_grn[0], diff_grn[1],
+        diff_blu[0], diff_blu[1],
+        diff_prp[0], diff_prp[1],
+        diff_org[0], diff_org[1],
+        diff_pnk[0], diff_pnk[1],
         
         pt_grn[0], pt_grn[1],
         pt_blu[0], pt_blu[1],

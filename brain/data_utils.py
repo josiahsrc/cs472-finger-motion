@@ -33,6 +33,16 @@ def prepare_data_imputed_norm(X, y):
     y = IterativeImputer(max_iter=10).fit(y).transform(y)
     
     # Normalize the data
-    X, y = normalize(X, norm='l2'), normalize(y, norm='l2')
+    X = normalize(X, norm='l2')
     
+    return X, y
+
+
+# This method prepares data by imputing mssing values
+# by learning patterns in the dataset. If missing datapoints
+# are found, a learner will predict was is missing.
+def prepare_data_imputed(X, y):
+    # Impute missing values
+    X = IterativeImputer(max_iter=10).fit(X).transform(X)
+    y = IterativeImputer(max_iter=10).fit(y).transform(y)
     return X, y

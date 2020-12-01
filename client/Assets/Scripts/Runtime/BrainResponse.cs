@@ -60,6 +60,8 @@ namespace BrainResponse
     [Serializable]
     public class Predict : Base
     {
+        public float[] prediction;
+
         public Predict() : base(TypeIDs.predict) { }
     }
 
