@@ -39,3 +39,18 @@ Send a message to a server over UDP to your localhost's (127.0.0.1) 5065 port:
 ```
 nc -u 127.0.0.1 5065 < some_file.txt
 ```
+
+**2. Conda**
+
+Create the conda environment by navigating to the brain folder and downloading the dependencies from the `environment.yml` file.
+
+```
+cd brain
+conda env create -f environment.yml
+```
+
+Activate conda environment
+
+```
+conda activate tf-cpu
+```

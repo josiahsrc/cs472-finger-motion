@@ -21,7 +21,7 @@ public class Brain : ScriptableObject
     [SerializeField] private int _threadDelay = 10;
     [Space]
     [SerializeField] private string _sendAddress = "127.0.0.1";
-    [SerializeField] private int _sendPort = 8080;
+    [SerializeField] private int _sendPort = 5002;
     [Space]
     [SerializeField] private string _recvAddress = "127.0.0.1";
     [SerializeField] private int _recvPort = 5065;
@@ -82,16 +82,20 @@ public class Brain : ScriptableObject
 
         builder.AppendLine($"Brain Status Report [{DateTime.Now.ToShortTimeString()}]");
         builder.AppendLine($"Is running: {isRunning}");
-        builder.AppendLine($"Request Queue Size: {_rawRequests.Count}");
-        builder.AppendLine($"Response Queue Size: {_rawResponses.Count}");
+        builder.AppendLine($"Request Queue Size: {_rawRequests?.Count ?? -1}");
+        builder.AppendLine($"Response Queue Size: {_rawResponses?.Count ?? -1}");
 
         return builder.ToString();
     }
 
     public void start()
     {
-        Debug.Assert(!isRunning);
         Debug.Assert(_driver != null);
+
+        if (isRunning)
+        {
+            stop();
+        }
 
         try
         {
@@ -102,7 +106,6 @@ public class Brain : ScriptableObject
             _sendThread = new Thread(new ThreadStart(threadProcess_send));
             _sendThread.IsBackground = true;
             _sendThread.Start();
-            _logger.info("Started UDP send thread");
 
             _recvSocket = new UDPReceiver(_recvAddress, _recvPort);
             _recvThread = new Thread(new ThreadStart(threadProcess_recv));
@@ -124,22 +127,21 @@ public class Brain : ScriptableObject
 
     public void stop()
     {
-        Debug.Assert(isRunning);
         Debug.Assert(_driver != null);
 
         try
         {
             _driver.stopSpinRoutine();
 
-            _sendThread.Abort();
+            _sendThread?.Abort();
             _sendThread = null;
-            _sendSocket.Dispose();
+            _sendSocket?.Dispose();
             _sendSocket = null;
             _logger.info("Stopped UDP send thread");
 
-            _recvThread.Abort();
+            _recvThread?.Abort();
             _recvThread = null;
-            _recvSocket.Dispose();
+            _recvSocket?.Dispose();
             _recvSocket = null;
             _logger.info("Stopped UDP recv thread");
 
@@ -280,7 +282,7 @@ public class Brain : ScriptableObject
                 builder.Append($"This probably means that there is no UDP server (brain) ");
                 builder.Append($"running on address={_sendAddress}, port={_sendPort}\n");
                 builder.Append(e.ToString());
-                _logger.error(builder);
+                _logger.warning(builder);
             }
         }
     }

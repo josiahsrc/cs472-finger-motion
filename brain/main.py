@@ -19,7 +19,6 @@ def appendInstance(reqTuple):
 
   #grab the filepath to write to,
   filepath = request['csvPath']
-  file_basename = os.path.basename(filepath)
 
   #calculate delta angles
   angles = np.copy(request['outputs'])
@@ -54,8 +53,13 @@ def appendInstance(reqTuple):
   #now they need to be writen to the file
   # print('delta angles:', delta_angles)
   # print('delta positions:', delta_points)
+  
+  # Make sure the specified folder exists
+  dir_name = os.path.dirname(filepath)
+  if not os.path.exists(dir_name):
+    os.makedirs(dir_name)
 
-  with open(file_basename, 'a') as fd:
+  with open(filepath, 'a+') as fd:
     writer = csv.writer(fd)
     writer.writerow(final_row)
 
@@ -84,16 +88,14 @@ def score():
 
 def handleRequests(reqQ, respQ):
   #Request thread handler
-
-
-  print('Will start handeling request')
+  print('Handle request loop started...')
   while True:
     reqTuple = reqQ.get()
     requestType = reqTuple[0]['type']
     resp = ()
 
     if requestType == 'append_instance':
-      rest = appendInstance(reqTuple)
+      resp = appendInstance(reqTuple)
     elif requestType == 'save_model':
       resp = saveModel(reqTuple)
     elif requestType == 'load_model':
@@ -111,14 +113,27 @@ def handleRequests(reqQ, respQ):
 
 
 def handleResponses(respQ):
+  print('Handle response loop started...')
+  
+  HOST, PORT = "127.0.0.1", 5065
+  sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    
   #Response thread handler
   while True:
+    #Blocks until an item is available
     resp = respQ.get()
     
+    if resp is None:
+      continue
+    
+    resp_json = json.dumps(resp)
+    resp_bytes = bytes(resp_json, "utf-8")
+    nbytes = sock.sendto(resp_bytes, (HOST, PORT))
+    print(f'Sent [{nbytes}/{len(resp_bytes)}] bytes back to client.')
   
 
 def main():
-  HOST, PORT = "127.0.0.1", 5002
+  HOST, PORT, BUF_SIZE = "127.0.0.1", 5002, 4096
   reqQ = Queue(1024)
   respQ = Queue(1024)
 
@@ -130,19 +145,17 @@ def main():
 
   cam = cameractrl.CameraCtrl()
 
-
-  #create a listening socket
+  #create a listening socket on the local host (reuse address)
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  #use local host
-  address = (HOST, PORT)
-  sock.bind(address)
+  sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  sock.bind((HOST, PORT))
   
-
-
+  print('Binded to recv port...')
+  
   prevPoints = None
   prevRequest = None
   while True:
-    request, addr = sock.recvfrom(1024)
+    request, addr = sock.recvfrom(BUF_SIZE)
 
     #decode the request and deserialize from json
     request = json.loads(request.decode())

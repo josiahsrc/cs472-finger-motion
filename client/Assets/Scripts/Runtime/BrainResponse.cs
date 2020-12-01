@@ -44,6 +44,8 @@ namespace BrainResponse
     [Serializable]
     public class AppendInstance : Base
     {
+        public string message;
+
         public AppendInstance() : base(TypeIDs.appendInstance) { }
     }
 
