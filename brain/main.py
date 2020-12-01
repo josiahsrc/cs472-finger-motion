@@ -75,9 +75,7 @@ N_COLS = N_FEATURES + N_LABELS
 #   return {'type': 'append_instance',
 #           'message': 'instance appended to {}'.format(filepath)}
 
-# APPEND INSTANCE RAW POINTS
-
-
+# APPEND INSTANCE USING RAW POINTS
 def appendInstance(reqTuple):
   # appends to a certian training data file
   request = reqTuple[0]
