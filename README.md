@@ -2,6 +2,33 @@
 
 Drive a virtual character's motion based on your finger movement.
 
+## TODO
+
+- With walking data, make some amount of time for just standing
+- Slow down the walking animation, too fast for useful features, OR speed up the polling rate of the unity client
+
+## How to train your dragon
+
+1. Start up the brain
+
+```
+python main.py
+```
+
+2. Start the training interface in the client
+
+```
+Window > App > Training Interface
+
+~Enter all the fields and set the dataframe asset~
+
+Press gather data and match up your hand motion to what appears in the animation
+```
+
+3. Open up your persistent data path were it saved the file. For more info on where your persistent data path is, check out the [unity docs](https://docs.unity3d.com/ScriptReference/Application-persistentDataPath.html).
+
+4. From there you can modify the `run_*.py` files to run your dataset.
+
 ## How this project is setup
 
 The project uses a client and a brain (server). The client uses the brain to predict output.

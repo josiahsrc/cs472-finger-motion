@@ -31,5 +31,5 @@ model = MLPRegressor(
 model.fit(X_train, y_train)
 
 # Evaluate the model
-score = dutils.score_avg_mse(model, X_test, y_test)
-print(f'MSE={score}')
+print(f'R^2={dutils.score_avg_rquared(model, X_test, y_test)}')
+print(f'MSE={dutils.score_avg_mse(model, X_test, y_test)}')

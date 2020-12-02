@@ -172,7 +172,7 @@ def handleRequests(reqQ, respQ):
     print('Setting up neural model...')
 
     # This stuff just exists to get the project working
-    data = pd.read_csv('data/walk00_raw_and_deltas.csv').values
+    data = pd.read_csv('data/crouch00_raw_and_deltas.csv').values
     N_FEATURES = 20
     N_LABELS = 4
 

@@ -25,7 +25,7 @@ N_FEATURES = 10
 N_LABELS = 4
 
 # Prepare the data
-data = pd.read_csv('data/walk00_raw_points.csv').values
+data = pd.read_csv('data/crouch00_raw_points.csv').values
 X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
 
 # Split train and test
@@ -42,5 +42,5 @@ model = MLPRegressor(
 model.fit(X_train, y_train)
 
 # Evaluate the model
-score = dutils.score_avg_mse(model, X_test, y_test)
-print(f'MSE={score}')
+print(f'R^2={dutils.score_avg_rquared(model, X_test, y_test)}')
+print(f'MSE={dutils.score_avg_mse(model, X_test, y_test)}')

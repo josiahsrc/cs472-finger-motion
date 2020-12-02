@@ -7,11 +7,20 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+from sklearn.metrics import mean_squared_error
+
+def score_avg_rquared(model, X_test, y_test):
+    tot = 0.0
+    for _ in range(10):
+        tot += model.score(X_test, y_test)
+    return tot / 10
 
 def score_avg_mse(model, X_test, y_test):
     tot = 0.0
     for _ in range(10):
-        tot += model.score(X_test, y_test)
+        y_pred = model.predict(X_test)
+        mse = mean_squared_error(y_test, y_pred)
+        tot += mse
     return tot / 10
 
 # Saves a numpy array to a CSV file, overwriting

@@ -3,21 +3,27 @@ import numpy as np
 import imutils
 
 
-# @josiahsrc presets: 
-# self.greenLower = np.array([40, 80, 80])
-# self.greenUpper = np.array([80, 255, 255])
+# @josiahsrc presets
+# Purple:   (hMin = 141 , sMin = 128, vMin = 47), (hMax = 162 , sMax = 255, vMax = 255)
+# Pink:     (hMin = 164 , sMin = 128, vMin = 47), (hMax = 177 , sMax = 255, vMax = 255)
+# Blue:     (hMin = 99 , sMin = 128, vMin = 47), (hMax = 132 , sMax = 255, vMax = 255)
+# Green:    (hMin = 24 , sMin = 60, vMin = 39), (hMax = 73 , sMax = 255, vMax = 255)
+# Orange:   (hMin = 0 , sMin = 91, vMin = 83), (hMax = 27 , sMax = 255, vMax = 255)
 
-# self.orangeLower = np.array([5, 180, 180])
-# self.orangeUpper = np.array([30, 255, 255])
+# self.greenLower = np.array([32, 60, 39])
+# self.greenUpper = np.array([64, 255, 255])
 
-# self.blueLower = np.array([90, 100, 100])
-# self.blueUpper = np.array([120, 255, 255])
+# self.orangeLower = np.array([5, 91, 83])
+# self.orangeUpper = np.array([22, 255, 255])
 
-# self.purpleLower = np.array([120, 100, 80])
-# self.purpleUpper = np.array([160, 255, 255])
+# self.blueLower = np.array([106, 128, 47])
+# self.blueUpper = np.array([126, 255, 255])
 
-# self.pinkLower = np.array([160, 180, 130])
-# self.pinkUpper = np.array([184, 255, 255])
+# self.purpleLower = np.array([145, 128, 47])
+# self.purpleUpper = np.array([159, 255, 255])
+
+# self.pinkLower = np.array([167, 128, 47])
+# self.pinkUpper = np.array([175, 255, 255])
 
 
 class CameraCtrl():
