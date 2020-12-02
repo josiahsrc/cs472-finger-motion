@@ -126,20 +126,20 @@ def predict(reqTuple, context: DevContext):
         None if diff_pnk is None else diff_pnk[1],
 
         # Points
-        None if pt_grn is None else pt_grn[0],
-        None if pt_grn is None else pt_grn[1],
+        None if pt_grn is None else pt_grn[0] - pt_grn[0],
+        None if pt_grn is None else pt_grn[1] - pt_grn[1],
 
-        None if pt_blu is None else pt_blu[0],
-        None if pt_blu is None else pt_blu[1],
+        None if pt_blu is None else pt_blu[0] - pt_grn[0],
+        None if pt_blu is None else pt_blu[1] - pt_grn[1],
 
-        None if pt_prp is None else pt_prp[0],
-        None if pt_prp is None else pt_prp[1],
+        None if pt_prp is None else pt_prp[0] - pt_grn[0],
+        None if pt_prp is None else pt_prp[1] - pt_grn[1],
 
-        None if pt_org is None else pt_org[0],
-        None if pt_org is None else pt_org[1],
+        None if pt_org is None else pt_org[0] - pt_grn[0],
+        None if pt_org is None else pt_org[1] - pt_grn[1],
 
-        None if pt_pnk is None else pt_pnk[0],
-        None if pt_pnk is None else pt_pnk[1],
+        None if pt_pnk is None else pt_pnk[0] - pt_grn[0],
+        None if pt_pnk is None else pt_pnk[1] - pt_grn[1],
     ]).reshape(1, -1)
 
     # Impute missing values

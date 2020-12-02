@@ -66,11 +66,11 @@ for i in range(X.shape[0]):
         diff_org[0], diff_org[1],
         diff_pnk[0], diff_pnk[1],
         
-        pt_grn[0], pt_grn[1],
-        pt_blu[0], pt_blu[1],
-        pt_prp[0], pt_prp[1],
-        pt_org[0], pt_org[1],
-        pt_pnk[0], pt_pnk[1],
+        pt_grn[0] - pt_grn[0], pt_grn[1] - pt_grn[1],
+        pt_blu[0] - pt_grn[0], pt_blu[1] - pt_grn[1],
+        pt_prp[0] - pt_grn[0], pt_prp[1] - pt_grn[1],
+        pt_org[0] - pt_grn[0], pt_org[1] - pt_grn[1],
+        pt_pnk[0] - pt_grn[0], pt_pnk[1] - pt_grn[1],
         
         curr_t[0],
         curr_t[1],
