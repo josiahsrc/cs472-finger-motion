@@ -8,32 +8,19 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
 
-# Report:
-# This model produces inconsistent results. 
-#
-# Some runs produced these MSEs:
-# MSE=0.016371870558437668
-# MSE=0.016371870558437668
-# MSE=0.2760732442505571
-#
-# There isn't really a pattern most likely because the
-# points of the character can be anywhere in the domain
-# of the screen (its hard to keep your hand in the same
-# spot when training).
-
-N_FEATURES = 20
+N_FEATURES = 12
 N_LABELS = 4
 
 # Prepare the data
-data = pd.read_csv('data/crouch00_raw_and_deltas.csv').values
-X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
+data = pd.read_csv('data/walk00_vectors_and_mags.csv').values
+X, y = data[:, :N_FEATURES], data[:, N_FEATURES:]
 
 # Split train and test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
 # Build the model
 model = MLPRegressor(
-    hidden_layer_sizes=(40, 80, 80, 40, 20),
+    hidden_layer_sizes=(32, 42,),
     activation='relu',
     solver='adam',
 )

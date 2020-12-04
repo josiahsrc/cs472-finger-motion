@@ -2,9 +2,12 @@
 # This dataset uses
 #
 # This databuilder derives the following features from the dataset
-# - Vectors
+# - Normalized vectors
 # - Magnitudes
 # - Angles (between joints)
+# - Points
+# - Previous points
+# - Differences
 
 # TODO: Make features, angle, etc...
 
