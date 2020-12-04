@@ -88,20 +88,23 @@ def predict(reqTuple, context: DevContext):
     if prev_points is None or curr_points is None:
         return
 
-    prev_pt_grn = None if prev_points[0] is None else np.array(prev_points[0])
-    prev_pt_blu = None if prev_points[1] is None else np.array(prev_points[1])
-    prev_pt_prp = None if prev_points[2] is None else np.array(prev_points[2])
-    prev_pt_org = None if prev_points[3] is None else np.array(prev_points[3])
-    prev_pt_pnk = None if prev_points[4] is None else np.array(prev_points[4])
+    prev_pt_grnl = None if prev_points[0] is None else np.array(prev_points[0])
+    prev_pt_grnr = None if prev_points[1] is None else np.array(prev_points[1])
+    prev_pt_blu = None if prev_points[2] is None else np.array(prev_points[2])
+    prev_pt_prp = None if prev_points[3] is None else np.array(prev_points[3])
+    prev_pt_org = None if prev_points[4] is None else np.array(prev_points[4])
+    prev_pt_pnk = None if prev_points[5] is None else np.array(prev_points[5])
 
-    pt_grn = None if curr_points[0] is None else np.array(curr_points[0])
-    pt_blu = None if curr_points[1] is None else np.array(curr_points[1])
-    pt_prp = None if curr_points[2] is None else np.array(curr_points[2])
-    pt_org = None if curr_points[3] is None else np.array(curr_points[3])
-    pt_pnk = None if curr_points[4] is None else np.array(curr_points[4])
+    pt_grnl = None if curr_points[0] is None else np.array(curr_points[0])
+    pt_grnr = None if curr_points[1] is None else np.array(curr_points[1])
+    pt_blu = None if curr_points[2] is None else np.array(curr_points[2])
+    pt_prp = None if curr_points[3] is None else np.array(curr_points[3])
+    pt_org = None if curr_points[4] is None else np.array(curr_points[4])
+    pt_pnk = None if curr_points[5] is None else np.array(curr_points[5])
 
     # Directional finger distance vectors
-    diff_grn = None if pt_grn is None or prev_pt_grn is None else pt_grn - prev_pt_grn
+    diff_grnl = None if pt_grnl is None or prev_pt_grnl is None else pt_grnl - prev_pt_grnl
+    diff_grnr = None if pt_grnr is None or prev_pt_grnr is None else pt_grnr - prev_pt_grnr
     diff_blu = None if pt_blu is None or prev_pt_blu is None else pt_blu - prev_pt_blu
     diff_prp = None if pt_prp is None or prev_pt_prp is None else pt_prp - prev_pt_prp
     diff_org = None if pt_org is None or prev_pt_org is None else pt_org - prev_pt_org
@@ -110,8 +113,11 @@ def predict(reqTuple, context: DevContext):
     # Input into the network
     input = np.array([
         # Deltas
-        None if diff_grn is None else diff_grn[0],
-        None if diff_grn is None else diff_grn[1],
+        None if diff_grnl is None else diff_grnl[0],
+        None if diff_grnl is None else diff_grnl[1],
+
+        None if diff_grnr is None else diff_grnr[0],
+        None if diff_grnr is None else diff_grnr[1],
 
         None if diff_blu is None else diff_blu[0],
         None if diff_blu is None else diff_blu[1],
@@ -126,20 +132,24 @@ def predict(reqTuple, context: DevContext):
         None if diff_pnk is None else diff_pnk[1],
 
         # Points
-        None if pt_grn is None else pt_grn[0] - pt_grn[0],
-        None if pt_grn is None else pt_grn[1] - pt_grn[1],
+        None if pt_grnl is None else pt_grnl[0],
+        None if pt_grnl is None else pt_grnl[1],
 
-        None if pt_blu is None else pt_blu[0] - pt_grn[0],
-        None if pt_blu is None else pt_blu[1] - pt_grn[1],
+        None if pt_grnr is None else pt_grnr[0],
+        None if pt_grnr is None else pt_grnr[1],
+        
 
-        None if pt_prp is None else pt_prp[0] - pt_grn[0],
-        None if pt_prp is None else pt_prp[1] - pt_grn[1],
+        None if pt_blu is None else pt_blu[0],
+        None if pt_blu is None else pt_blu[1],
 
-        None if pt_org is None else pt_org[0] - pt_grn[0],
-        None if pt_org is None else pt_org[1] - pt_grn[1],
+        None if pt_prp is None else pt_prp[0],
+        None if pt_prp is None else pt_prp[1],
 
-        None if pt_pnk is None else pt_pnk[0] - pt_grn[0],
-        None if pt_pnk is None else pt_pnk[1] - pt_grn[1],
+        None if pt_org is None else pt_org[0],
+        None if pt_org is None else pt_org[1],
+
+        None if pt_pnk is None else pt_pnk[0],
+        None if pt_pnk is None else pt_pnk[1],
     ]).reshape(1, -1)
 
     # Impute missing values
