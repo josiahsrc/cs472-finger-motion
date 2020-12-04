@@ -4,26 +4,20 @@ import imutils
 
 
 # @josiahsrc presets
-# Purple:   (hMin = 141 , sMin = 128, vMin = 47), (hMax = 162 , sMax = 255, vMax = 255)
-# Pink:     (hMin = 164 , sMin = 128, vMin = 47), (hMax = 177 , sMax = 255, vMax = 255)
-# Blue:     (hMin = 99 , sMin = 128, vMin = 47), (hMax = 132 , sMax = 255, vMax = 255)
-# Green:    (hMin = 24 , sMin = 60, vMin = 39), (hMax = 73 , sMax = 255, vMax = 255)
-# Orange:   (hMin = 0 , sMin = 91, vMin = 83), (hMax = 27 , sMax = 255, vMax = 255)
+# Purple:   (141 , 128, 47), (162, 255, , 255)
+# Pink:     (164 , 128, 47), (177, 255, , 255)
+# Blue:     (99 , 128, 47), (132, 255, , 255)
+# Green:    (24 , 60, 39), (73, 255, , 255)
+# Orange:   (0 , 91, 83), (27, 255, , 255)
 
-# self.greenLower = np.array([32, 60, 39])
-# self.greenUpper = np.array([64, 255, 255])
 
-# self.orangeLower = np.array([5, 91, 83])
-# self.orangeUpper = np.array([22, 255, 255])
+#@edwardsrc presets
+#pink (138, 89, 180), (162, 255, 255)
+#purple (124, 147, 170), (132, 255, 255)
+#blue (102, 150, 193), (113, 255, 255)
+#green (54, 21, 168), (92, 255, 255)
+#orange (2, 70, 230), (9, 255, 55)
 
-# self.blueLower = np.array([106, 128, 47])
-# self.blueUpper = np.array([126, 255, 255])
-
-# self.purpleLower = np.array([145, 128, 47])
-# self.purpleUpper = np.array([159, 255, 255])
-
-# self.pinkLower = np.array([167, 128, 47])
-# self.pinkUpper = np.array([175, 255, 255])
 
 
 class CameraCtrl():
@@ -31,21 +25,38 @@ class CameraCtrl():
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
 
-        # These colors are HSV values
-        self.greenLower = np.array([40, 80, 80])
-        self.greenUpper = np.array([80, 255, 255])
+        #These colors are HSV values
+        self.greenLower = np.array([54, 21, 168])
+        self.greenUpper = np.array([92, 255, 255])
 
-        self.orangeLower = np.array([5, 180, 180])
-        self.orangeUpper = np.array([30, 255, 255])
+        self.orangeLower = np.array([2, 91, 230])
+        self.orangeUpper = np.array([9, 255, 255])
 
-        self.blueLower = np.array([90, 100, 100])
-        self.blueUpper = np.array([120, 255, 255])
+        self.blueLower = np.array([102, 150, 193])
+        self.blueUpper = np.array([113, 255, 255])
 
-        self.purpleLower = np.array([120, 100, 80])
-        self.purpleUpper = np.array([160, 255, 255])
+        self.purpleLower = np.array([124, 147, 170])
+        self.purpleUpper = np.array([132, 255, 255])
 
-        self.pinkLower = np.array([160, 180, 130])
-        self.pinkUpper = np.array([184, 255, 255])
+        self.pinkLower = np.array([138, 89, 180])
+        self.pinkUpper = np.array([162, 255, 255])
+        
+        # self.greenLower = np.array([32, 60, 39])
+        # self.greenUpper = np.array([64, 255, 255])
+
+        # self.orangeLower = np.array([5, 91, 83])
+        # self.orangeUpper = np.array([22, 255, 255])
+
+        # self.blueLower = np.array([106, 128, 47])
+        # self.blueUpper = np.array([126, 255, 255])
+
+        # self.purpleLower = np.array([145, 128, 47])
+        # self.purpleUpper = np.array([159, 255, 255])
+
+        # self.pinkLower = np.array([167, 128, 47])
+        # self.pinkUpper = np.array([175, 255, 255])
+
+
 
     def __del__(self):
         self.cap.release()
@@ -71,6 +82,36 @@ class CameraCtrl():
 
         return None
 
+    #the green ones need to be handled a little differently. always orient left and right, assume never upside down.
+    def bestGreenCenters(self, mask):
+        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+
+        centers = []
+        for cnt in cnts:
+            ((x, y), radius) = cv2.minEnclosingCircle(cnt)
+            M = cv2.moments(cnt)
+            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+
+            if radius > 3 and radius < 100:
+                centers.append(center)
+            
+            if len(centers) >= 2:
+                break
+        
+        center_l = None
+        center_r = None
+        if len(centers) >= 2:
+            if centers[0] < centers[1]:
+                center_l = centers[0]
+                center_r = centers[1]
+            else:
+                center_l = centers[1]
+                center_r = centers[0]
+
+        return center_l, center_r
+
+
     def getFrame(self):
         success, frame = self.cap.read()
 
@@ -84,21 +125,29 @@ class CameraCtrl():
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
         # gather each of the point colors
+
+        # green is the origin we must handle it differently
         greenMask = self.createMask(hsv, self.greenLower, self.greenUpper)
+
+
         orangeMask = self.createMask(hsv, self.orangeLower, self.orangeUpper)
         blueMask = self.createMask(hsv, self.blueLower, self.blueUpper)
         purpleMask = self.createMask(hsv, self.purpleLower, self.purpleUpper)
         pinkMask = self.createMask(hsv, self.pinkLower, self.pinkUpper)
 
         # green is the root, connecting to blue and purple. blue connects to orange, and purple connects to pink
-        masks = [greenMask, blueMask, purpleMask, orangeMask, pinkMask]
+        masks = [blueMask, purpleMask, orangeMask, pinkMask]
 
         total_mask = greenMask | orangeMask | blueMask | purpleMask | pinkMask
 
-        centers = np.full(5, None)
+        centers = np.full(6, None)
+
+        green_l, green_r = self.bestGreenCenters(greenMask)
+        centers[0] = green_l
+        centers[1] = green_r
 
         for i in range(len(masks)):
-            centers[i] = self.bestContourCenter(masks[i])
+            centers[i + 2] = self.bestContourCenter(masks[i])
 
         tracked_frame = np.copy(frame)
         for center in centers:
@@ -107,18 +156,21 @@ class CameraCtrl():
 
         # draw connection between green and blue
         if centers[0] is not None and centers[1] is not None:
-            cv2.line(tracked_frame, centers[0], centers[1], (0, 255, 0), 2)
+            cv2.line(tracked_frame, centers[0], centers[1], (255, 0, 255), 2)
+
+        if centers[1] is not None and centers[2] is not None:
+            cv2.line(tracked_frame, centers[1], centers[2], (0, 255, 0), 2)
 
         # draw connection between green and purple
-        if centers[0] is not None and centers[2] is not None:
-            cv2.line(tracked_frame, centers[0], centers[2], (0, 255, 0), 2)
+        if centers[0] is not None and centers[3] is not None:
+            cv2.line(tracked_frame, centers[0], centers[3], (0, 255, 0), 2)
 
         # draw connection between blue and orange
-        if centers[1] is not None and centers[3] is not None:
-            cv2.line(tracked_frame, centers[1], centers[3], (0, 255, 0), 2)
-
-        # draw connection between purple and pink
         if centers[2] is not None and centers[4] is not None:
             cv2.line(tracked_frame, centers[2], centers[4], (0, 255, 0), 2)
 
-        return centers, tracked_frame
+        # draw connection between purple and pink
+        if centers[3] is not None and centers[5] is not None:
+            cv2.line(tracked_frame, centers[3], centers[5], (0, 255, 0), 2)
+
+        return centers, tracked_frame #total_mask
