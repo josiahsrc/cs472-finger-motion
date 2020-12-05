@@ -26,6 +26,8 @@ input_datasets = [
     'data/crouchraw_josiah_02.csv', 
     'data/crouchraw_josiah_03.csv',   
     'data/crouchraw_josiah_04.csv',   
+    'data/crouchraw_josiah_05.csv',   
+    'data/crouchraw_josiah_06.csv',   
 ]
 output_dataset = 'data/bighefty2.csv'
 
