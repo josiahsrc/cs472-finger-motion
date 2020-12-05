@@ -8,7 +8,7 @@ def nothing(x):
 
 
 # Load in image
-image = cv2.imread('media/colors_josiahsrc.png', cv2.IMREAD_COLOR)
+image = cv2.imread('media/colors_josiahsrc02.png', cv2.IMREAD_COLOR)
 
 # Create a window
 cv2.namedWindow('image')
