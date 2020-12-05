@@ -11,7 +11,7 @@ from sklearn.preprocessing import normalize
 
 # Report:
 
-data = pd.read_csv('data/bighefty2.csv').values
+data = pd.read_csv('data/walk_edward.csv').values
 
 N_LABELS = 4
 N_FEATURES = data.shape[1] - N_LABELS
@@ -20,8 +20,7 @@ N_FEATURES = data.shape[1] - N_LABELS
 X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
 
 # Split train and test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-X_train, X_validate, y_train, y_validate = train_test_split(X_train, y_train, test_size=0.10)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
 # # Build the model
 # model = MLPRegressor(
@@ -58,12 +57,7 @@ model.compile(
 )
 
 # Fit the model
-model.fit(
-    X_train, 
-    y_train, 
-    epochs=500,
-    # validation_data=(X_validate, validate)
-)
+model.fit(X_train, y_train, epochs=500)
 
 # Evaluate the model
 score = model.evaluate(X_test, y_test)
