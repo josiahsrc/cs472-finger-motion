@@ -41,14 +41,14 @@ class CameraCtrl():
         # self.pinkUpper = np.array([162, 255, 255])
         
         # Josiah presets
-        self.greenLower = np.array([34, 75, 32])
-        self.greenUpper = np.array([84, 255, 242])
+        self.greenLower = np.array([37, 48, 99])
+        self.greenUpper = np.array([82, 228, 239])
 
-        self.orangeLower = np.array([0, 210, 230])
+        self.orangeLower = np.array([0, 189, 202])
         self.orangeUpper = np.array([19, 255, 255])
 
-        self.blueLower = np.array([102, 184, 89])
-        self.blueUpper = np.array([112, 255, 255])
+        self.blueLower = np.array([98, 137, 101])
+        self.blueUpper = np.array([119, 255, 255])
 
         self.purpleLower = np.array([128, 152, 80])
         self.purpleUpper = np.array([159, 255, 220])
