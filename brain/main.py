@@ -182,36 +182,36 @@ def handleRequests(reqQ, respQ):
     print('Setting up neural model...')
 
     # This stuff just exists to get the project working
-    data = pd.read_csv('data/crouch00_raw_and_deltas.csv').values
-    N_FEATURES = 20
-    N_LABELS = 4
+    # data = pd.read_csv('data/crouch00_raw_and_deltas.csv').values
+    # N_FEATURES = 20
+    # N_LABELS = 4
 
     context = DevContext()
-    context.n_features = N_FEATURES
-    context.n_labels = N_LABELS
+    # context.n_features = N_FEATURES
+    # context.n_labels = N_LABELS
 
-    # Build the data imputer
-    context.imputer = IterativeImputer(max_iter=10).fit(data[:, :N_FEATURES])
+    # # Build the data imputer
+    # context.imputer = IterativeImputer(max_iter=10).fit(data[:, :N_FEATURES])
     
-    # Build the data normalizer
-    context.normalizer = Normalizer().fit(data[:, :N_FEATURES])
+    # # Build the data normalizer
+    # context.normalizer = Normalizer().fit(data[:, :N_FEATURES])
 
-    # Prepare the data
-    X, y = dutils.prepare_data_imputed(data[:, :N_FEATURES], data[:, N_FEATURES:])
-    X_train, y_train = X, y
+    # # Prepare the data
+    # X, y = dutils.prepare_data_imputed(data[:, :N_FEATURES], data[:, N_FEATURES:])
+    # X_train, y_train = X, y
 
-    # Build the model
-    context.model = MLPRegressor(
-        hidden_layer_sizes=(32, 42,),
-        activation='relu',
-        solver='adam',
-    )
+    # # Build the model
+    # context.model = MLPRegressor(
+    #     hidden_layer_sizes=(32, 42,),
+    #     activation='relu',
+    #     solver='adam',
+    # )
 
-    # Fit the model
-    print('Fitting neural model...')
-    context.model.fit(X_train, y_train)
+    # # Fit the model
+    # print('Fitting neural model...')
+    # context.model.fit(X_train, y_train)
 
-    print('Neural model setup done!')
+    # print('Neural model setup done!')
     ##################################
     ## END_REGION: CONTEXT SETUP    ##
     ##################################
