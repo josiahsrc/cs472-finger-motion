@@ -25,36 +25,37 @@ class CameraCtrl():
 
         #These colors are HSV values
         #Edward presets:
-        # self.greenLower = np.array([54, 21, 168])
-        # self.greenUpper = np.array([92, 255, 255])
-
-        # self.orangeLower = np.array([2, 91, 230])
-        # self.orangeUpper = np.array([9, 255, 255])
-
-        # self.blueLower = np.array([102, 150, 193])
-        # self.blueUpper = np.array([113, 255, 255])
-
-        # self.purpleLower = np.array([124, 147, 170])
-        # self.purpleUpper = np.array([132, 255, 255])
-
-        # self.pinkLower = np.array([138, 89, 180])
-        # self.pinkUpper = np.array([162, 255, 255])
-        
-        # Josiah presets
         self.greenLower = np.array([34, 75, 32])
         self.greenUpper = np.array([84, 255, 242])
 
-        self.orangeLower = np.array([0, 210, 230])
-        self.orangeUpper = np.array([19, 255, 255])
+        self.orangeLower = np.array([2, 129, 197])
+        self.orangeUpper = np.array([11, 255, 255])
 
         self.blueLower = np.array([102, 184, 89])
         self.blueUpper = np.array([112, 255, 255])
 
         self.purpleLower = np.array([128, 152, 80])
         self.purpleUpper = np.array([159, 255, 220])
-
+        
         self.pinkLower = np.array([157, 139, 146])
         self.pinkUpper = np.array([176, 255, 255])
+
+        
+        # Josiah presets
+        # self.greenLower = np.array([34, 75, 32])
+        # self.greenUpper = np.array([84, 255, 242])
+
+        # self.orangeLower = np.array([0, 210, 230])
+        # self.orangeUpper = np.array([19, 255, 255])
+
+        # self.blueLower = np.array([102, 184, 89])
+        # self.blueUpper = np.array([112, 255, 255])
+
+        # self.purpleLower = np.array([128, 152, 80])
+        # self.purpleUpper = np.array([159, 255, 220])
+
+        # self.pinkLower = np.array([157, 139, 146])
+        # self.pinkUpper = np.array([176, 255, 255])
 
     def __del__(self):
         self.cap.release()
