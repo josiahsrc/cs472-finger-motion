@@ -183,6 +183,9 @@ MonoBehaviour:
     upperLegR: {fileID: 1383217974125284927}
     lowerLegL: {fileID: 1383217973149431280}
     lowerLegR: {fileID: 1383217974128211525}
+  _predictionDelay: 0.1
+  _smoothing: 30
+  _debug: 1
 --- !u!95 &6981865934370856975
 Animator:
   serializedVersion: 3

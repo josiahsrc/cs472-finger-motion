@@ -31,8 +31,8 @@ class CameraCtrl():
         self.orangeLower = np.array([2, 129, 197])
         self.orangeUpper = np.array([11, 255, 255])
 
-        self.blueLower = np.array([102, 184, 89])
-        self.blueUpper = np.array([112, 255, 255])
+        self.blueLower = np.array([98, 137, 101])
+        self.blueUpper = np.array([119, 255, 255])
 
         self.purpleLower = np.array([128, 152, 80])
         self.purpleUpper = np.array([159, 255, 220])
