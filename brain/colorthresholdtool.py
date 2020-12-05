@@ -8,7 +8,7 @@ def nothing(x):
 
 
 # Load in image
-image = cv2.imread('media/colors.jpg', cv2.IMREAD_COLOR)
+image = cv2.imread('media/colors_josiahsrc.png', cv2.IMREAD_COLOR)
 
 # Create a window
 cv2.namedWindow('image')
@@ -55,7 +55,8 @@ while(1):
 
     # Print if there is a change in HSV value
     if((phMin != hMin) | (psMin != sMin) | (pvMin != vMin) | (phMax != hMax) | (psMax != sMax) | (pvMax != vMax)):
-        print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d, vMax = %d)" % (hMin, sMin, vMin, hMax, sMax, vMax))
+        # print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d, vMax = %d)" % (hMin, sMin, vMin, hMax, sMax, vMax))
+        print('min=np.array([%d, %d, %d]), max=np.array([%d, %d, %d])' % (hMin, sMin, vMin, hMax, sMax, vMax))
         phMin = hMin
         psMin = sMin
         pvMin = vMin

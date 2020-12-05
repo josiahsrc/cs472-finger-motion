@@ -4,11 +4,9 @@ import imutils
 
 
 # @josiahsrc presets
-# Purple:   (141 , 128, 47), (162, 255, , 255)
-# Pink:     (164 , 128, 47), (177, 255, , 255)
-# Blue:     (99 , 128, 47), (132, 255, , 255)
-# Green:    (24 , 60, 39), (73, 255, , 255)
-# Orange:   (0 , 91, 83), (27, 255, , 255)
+# green:    min=np.array([46, 61, 97]), max=np.array([86, 255, 255])
+# blue:     min=np.array([105, 96, 71]), max=np.array([125, 255, 144])
+# purple:   min=np.array([135, 222, 30]), max=np.array([159, 255, 132])
 
 
 #@edwardsrc presets
@@ -26,37 +24,37 @@ class CameraCtrl():
         self.cap = cv2.VideoCapture(0)
 
         #These colors are HSV values
-        self.greenLower = np.array([54, 21, 168])
+        #Edward presets:
+        # self.greenLower = np.array([54, 21, 168])
+        # self.greenUpper = np.array([92, 255, 255])
+
+        # self.orangeLower = np.array([2, 91, 230])
+        # self.orangeUpper = np.array([9, 255, 255])
+
+        # self.blueLower = np.array([102, 150, 193])
+        # self.blueUpper = np.array([113, 255, 255])
+
+        # self.purpleLower = np.array([124, 147, 170])
+        # self.purpleUpper = np.array([132, 255, 255])
+
+        # self.pinkLower = np.array([138, 89, 180])
+        # self.pinkUpper = np.array([162, 255, 255])
+        
+        # Josiah presets
+        self.greenLower = np.array([50, 66, 106])
         self.greenUpper = np.array([92, 255, 255])
 
-        self.orangeLower = np.array([2, 91, 230])
-        self.orangeUpper = np.array([9, 255, 255])
+        self.orangeLower = np.array([2, 148, 191])
+        self.orangeUpper = np.array([33, 255, 255])
 
-        self.blueLower = np.array([102, 150, 193])
-        self.blueUpper = np.array([113, 255, 255])
+        self.blueLower = np.array([102, 184, 89])
+        self.blueUpper = np.array([112, 255, 255])
 
-        self.purpleLower = np.array([124, 147, 170])
-        self.purpleUpper = np.array([132, 255, 255])
+        self.purpleLower = np.array([113, 145, 90])
+        self.purpleUpper = np.array([153, 255, 160])
 
-        self.pinkLower = np.array([138, 89, 180])
-        self.pinkUpper = np.array([162, 255, 255])
-        
-        # self.greenLower = np.array([32, 60, 39])
-        # self.greenUpper = np.array([64, 255, 255])
-
-        # self.orangeLower = np.array([5, 91, 83])
-        # self.orangeUpper = np.array([22, 255, 255])
-
-        # self.blueLower = np.array([106, 128, 47])
-        # self.blueUpper = np.array([126, 255, 255])
-
-        # self.purpleLower = np.array([145, 128, 47])
-        # self.purpleUpper = np.array([159, 255, 255])
-
-        # self.pinkLower = np.array([167, 128, 47])
-        # self.pinkUpper = np.array([175, 255, 255])
-
-
+        self.pinkLower = np.array([157, 139, 146])
+        self.pinkUpper = np.array([176, 255, 255])
 
     def __del__(self):
         self.cap.release()
@@ -172,5 +170,6 @@ class CameraCtrl():
         # draw connection between purple and pink
         if centers[3] is not None and centers[5] is not None:
             cv2.line(tracked_frame, centers[3], centers[5], (0, 255, 0), 2)
-
+        
+        # return centers, blurred
         return centers, tracked_frame #total_mask
