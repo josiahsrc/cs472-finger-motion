@@ -12,6 +12,7 @@ import setup
 import tensorflow as tf
 import pandas as pd
 import data_utils as dutils
+import databuilder_bighefty2 as bighefty2
 
 from multiprocessing import Process, Queue
 from sklearn.model_selection import train_test_split
@@ -80,90 +81,49 @@ def loadModel():
 
 
 def predict(reqTuple, context: DevContext):
-    # The issue here is that the inputs ARENT normalized
-
     curr_points = reqTuple[2]
     prev_points = reqTuple[3]
 
     if prev_points is None or curr_points is None:
         return
-
-    prev_pt_grnl = None if prev_points[0] is None else np.array(prev_points[0])
-    prev_pt_grnr = None if prev_points[1] is None else np.array(prev_points[1])
-    prev_pt_blu = None if prev_points[2] is None else np.array(prev_points[2])
-    prev_pt_prp = None if prev_points[3] is None else np.array(prev_points[3])
-    prev_pt_org = None if prev_points[4] is None else np.array(prev_points[4])
-    prev_pt_pnk = None if prev_points[5] is None else np.array(prev_points[5])
-
-    pt_grnl = None if curr_points[0] is None else np.array(curr_points[0])
-    pt_grnr = None if curr_points[1] is None else np.array(curr_points[1])
-    pt_blu = None if curr_points[2] is None else np.array(curr_points[2])
-    pt_prp = None if curr_points[3] is None else np.array(curr_points[3])
-    pt_org = None if curr_points[4] is None else np.array(curr_points[4])
-    pt_pnk = None if curr_points[5] is None else np.array(curr_points[5])
-
-    # Directional finger distance vectors
-    diff_grnl = None if pt_grnl is None or prev_pt_grnl is None else pt_grnl - prev_pt_grnl
-    diff_grnr = None if pt_grnr is None or prev_pt_grnr is None else pt_grnr - prev_pt_grnr
-    diff_blu = None if pt_blu is None or prev_pt_blu is None else pt_blu - prev_pt_blu
-    diff_prp = None if pt_prp is None or prev_pt_prp is None else pt_prp - prev_pt_prp
-    diff_org = None if pt_org is None or prev_pt_org is None else pt_org - prev_pt_org
-    diff_pnk = None if pt_pnk is None or prev_pt_pnk is None else pt_pnk - prev_pt_pnk
-
-    # Input into the network
-    input = np.array([
-        # Deltas
-        None if diff_grnl is None else diff_grnl[0],
-        None if diff_grnl is None else diff_grnl[1],
-
-        None if diff_grnr is None else diff_grnr[0],
-        None if diff_grnr is None else diff_grnr[1],
-
-        None if diff_blu is None else diff_blu[0],
-        None if diff_blu is None else diff_blu[1],
-
-        None if diff_prp is None else diff_prp[0],
-        None if diff_prp is None else diff_prp[1],
-
-        None if diff_org is None else diff_org[0],
-        None if diff_org is None else diff_org[1],
-
-        None if diff_pnk is None else diff_pnk[0],
-        None if diff_pnk is None else diff_pnk[1],
-
-        # Points
-        None if pt_grnl is None else pt_grnl[0],
-        None if pt_grnl is None else pt_grnl[1],
-
-        None if pt_grnr is None else pt_grnr[0],
-        None if pt_grnr is None else pt_grnr[1],
-        
-
-        None if pt_blu is None else pt_blu[0],
-        None if pt_blu is None else pt_blu[1],
-
-        None if pt_prp is None else pt_prp[0],
-        None if pt_prp is None else pt_prp[1],
-
-        None if pt_org is None else pt_org[0],
-        None if pt_org is None else pt_org[1],
-
-        None if pt_pnk is None else pt_pnk[0],
-        None if pt_pnk is None else pt_pnk[1],
-    ]).reshape(1, -1)
-
-    # Impute missing values
-    input = context.imputer.transform(input)
     
-    # Normalize the data based on past findings
-    input = context.normalizer.transform(input)
-
-    # Predict output
-    output = context.model.predict(input).reshape(-1).tolist()
-
+    def get_val(tup, idx):
+        return None if tup is None else tup[idx]
+    
+    curr_points = np.array([[
+        get_val(curr_points[0], 0), get_val(curr_points[0], 1),
+        get_val(curr_points[1], 0), get_val(curr_points[1], 1),
+        get_val(curr_points[2], 0), get_val(curr_points[2], 1),
+        get_val(curr_points[3], 0), get_val(curr_points[3], 1),
+        get_val(curr_points[4], 0), get_val(curr_points[4], 1),
+        get_val(curr_points[5], 0), get_val(curr_points[5], 1),
+    ]])
+    
+    prev_points = np.array([[
+        get_val(prev_points[0], 0), get_val(prev_points[0], 1),
+        get_val(prev_points[1], 0), get_val(prev_points[1], 1),
+        get_val(prev_points[2], 0), get_val(prev_points[2], 1),
+        get_val(prev_points[3], 0), get_val(prev_points[3], 1),
+        get_val(prev_points[4], 0), get_val(prev_points[4], 1),
+        get_val(prev_points[5], 0), get_val(prev_points[5], 1),
+    ]])
+    
+    # Impute missing values an normalize
+    curr_points, prev_points = context.imputer.transform(curr_points), context.imputer.transform(prev_points)
+    curr_points, prev_points = context.normalizer.transform(curr_points), context.imputer.transform(prev_points)
+    
+    # Make sure points are 1D
+    curr_points, prev_points = curr_points.reshape(-1), prev_points.reshape(-1)
+    
+    # Make a prediction
+    features = bighefty2.build_features(curr_points, prev_points).reshape(1, -1)
+    prediction = context.model.predict(features).reshape(-1).tolist()
+    
     # Return the prediction
-    return {'type': 'predict',
-            'prediction': output}
+    return {
+        'type': 'predict',
+        'prediction': prediction,
+    }
 
 
 def fit(reqTuple, context):
@@ -182,36 +142,28 @@ def handleRequests(reqQ, respQ):
     print('Setting up neural model...')
 
     # This stuff just exists to get the project working
-    # data = pd.read_csv('data/crouch00_raw_and_deltas.csv').values
-    # N_FEATURES = 20
-    # N_LABELS = 4
+    data = bighefty2.get_raw_input_data()
+    N_LABELS = 4
+    N_FEATURES = data.shape[1] - N_LABELS
 
     context = DevContext()
-    # context.n_features = N_FEATURES
-    # context.n_labels = N_LABELS
+    context.n_features = N_FEATURES
+    context.n_labels = N_LABELS
 
-    # # Build the data imputer
-    # context.imputer = IterativeImputer(max_iter=10).fit(data[:, :N_FEATURES])
+    # Build the data imputer
+    print('Building value imputer...')
+    context.imputer = IterativeImputer(max_iter=10).fit(data[:, :N_FEATURES])
+    temp_imputed_data = context.imputer.transform(data[:, :N_FEATURES])
     
-    # # Build the data normalizer
-    # context.normalizer = Normalizer().fit(data[:, :N_FEATURES])
+    # Build the data normalizer
+    print('Building value normalizer...')
+    context.normalizer = Normalizer().fit(temp_imputed_data)
 
-    # # Prepare the data
-    # X, y = dutils.prepare_data_imputed(data[:, :N_FEATURES], data[:, N_FEATURES:])
-    # X_train, y_train = X, y
+    # Load the model
+    print('Loading saved model...')
+    context.model = tf.keras.models.load_model('saved/bighefty2')
 
-    # # Build the model
-    # context.model = MLPRegressor(
-    #     hidden_layer_sizes=(32, 42,),
-    #     activation='relu',
-    #     solver='adam',
-    # )
-
-    # # Fit the model
-    # print('Fitting neural model...')
-    # context.model.fit(X_train, y_train)
-
-    # print('Neural model setup done!')
+    print('Neural model setup done!')
     ##################################
     ## END_REGION: CONTEXT SETUP    ##
     ##################################
@@ -262,24 +214,24 @@ def handleResponses(respQ):
 
 
 def main():
+    print('Starting up server...')
     HOST, PORT, BUF_SIZE = "127.0.0.1", 5002, 4096
     reqQ = Queue(1024)
     respQ = Queue(1024)
 
+    print('Starting processes...')
     RequestProcess = Process(target=handleRequests, args=(reqQ, respQ,))
     ResponseProcess = Process(target=handleResponses, args=(respQ,))
-
     RequestProcess.start()
     ResponseProcess.start()
 
     cam = cameractrl.CameraCtrl()
 
     # create a listening socket on the local host (reuse address)
+    print('Binding to recv port...')
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((HOST, PORT))
-
-    print('Binded to recv port...')
 
     prevPoints = None
     prevRequest = None

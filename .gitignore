@@ -1,6 +1,10 @@
 .DS_Store
 .idea
+<<<<<<< HEAD
 brain/__pycache__/data_utils.cpython-37.pyc
 brain/__pycache__/cameractrl.cpython-37.pyc
 brain/__pycache__/setup.cpython-37.pyc
 brain/__pycache__/data_utils.cpython-37.pyc
+=======
+brain/__pycache__/*
+>>>>>>> da31e7146be82d1036305ff55885ac98e5cecdcb

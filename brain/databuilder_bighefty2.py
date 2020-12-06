@@ -7,6 +7,26 @@ import data_utils as dutils
 import setup
 import math
 
+##########################
+## REGION: PARAMS       ##
+##########################
+N_FEATURES = 12
+N_LABELS = 4
+OUT_DATASET = 'data/bighefty2.csv'
+IN_DATASETS = [
+    'data/crouchraw_josiah_00.csv',   
+    'data/crouchraw_josiah_01.csv',   
+    'data/crouchraw_josiah_02.csv', 
+    'data/crouchraw_josiah_03.csv',   
+    'data/crouchraw_josiah_04.csv',   
+    'data/crouchraw_josiah_05.csv',   
+    'data/crouchraw_josiah_06.csv',   
+    'data/crouchraw_josiah_07.csv',
+]
+##########################
+## END_REGION: PARAMS   ##
+##########################
+
 def rads_between(v1, v2):
     v1_u = v1 / np.linalg.norm(v1)
     v2_u = v2 / np.linalg.norm(v2)
@@ -17,44 +37,16 @@ def dot_between(v1, v2):
     v2_u = v2 / np.linalg.norm(v2)
     return np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)
 
-# Files
-N_FEATURES = 12
-N_LABELS = 4
-input_datasets = [
-    'data/crouchraw_josiah_00.csv',   
-    'data/crouchraw_josiah_01.csv',   
-    'data/crouchraw_josiah_02.csv', 
-    'data/crouchraw_josiah_03.csv',   
-    'data/crouchraw_josiah_04.csv',   
-    'data/crouchraw_josiah_05.csv',   
-    'data/crouchraw_josiah_06.csv',   
-]
-output_dataset = 'data/bighefty2.csv'
-
-# Concat all input files
-data = np.empty((0, N_FEATURES + N_LABELS))
-for i in range(len(input_datasets)):
-    d = pd.read_csv(input_datasets[i]).values
-    data = np.concatenate((data, d), axis=0)
+# This method will build an instance of bighefty2.
+# THE ARRAYS MUST NOT BE EMPTY AN MUST NOT HAVE MISSING DATA.
+# THE OUTPUTS (LABELS) ARE NOT INCLUDED IN THIS.
+#
+# Returns a 1D array of the features.
+def build_features(prev_x, curr_x):
+    assert(prev_x is not None)
+    assert(curr_x is not None)
+    assert(prev_x.size == curr_x.size)
     
-# Prepare input data
-X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
-
-RES_FEATURES = 58
-RES_LABELS = 4
-result = np.empty((0, RES_FEATURES + RES_LABELS))
-
-prev_x = None
-
-# For each instance in the dataset
-assert X.shape[0] == y.shape[0]
-for i in range(X.shape[0]):
-    curr_x, curr_t = X[i, :], y[i, :]
-
-    if prev_x is None:
-        prev_x = np.copy(curr_x)
-        continue
-
     # FEATURE: Previous points (6x2=12)
     TEMP_PREV_ORIGIN = (prev_x[0:2] + prev_x[2:4]) / 2
     prev_pt_grL = prev_x[0:2]
@@ -112,7 +104,7 @@ for i in range(X.shape[0]):
     curr_angl_kneeR = rads_between(curr_nrm_grR2prp, curr_nrm_prp2pnk)
     
     # Row to append
-    row = np.array([
+    features = np.array([
         curr_mag_grL2blu,
         curr_mag_blu2org,
         curr_mag_grR2prp,
@@ -152,16 +144,45 @@ for i in range(X.shape[0]):
         diff_pt_prp[0], diff_pt_prp[1],
         diff_pt_org[0], diff_pt_org[1],
         diff_pt_pnk[0], diff_pt_pnk[1],
-        
-        curr_t[0],
-        curr_t[1],
-        curr_t[2],
-        curr_t[3],
-    ]).reshape(1, -1)
+    ])
     
-    result = np.concatenate((result, row), axis=0)
+    return features
+
+def get_raw_input_data():
+    data = np.empty((0, N_FEATURES + N_LABELS))
+    for i in range(len(IN_DATASETS)):
+        d = pd.read_csv(IN_DATASETS[i]).values
+        data = np.concatenate((data, d), axis=0)
+    return data
+
+# Concat all input files
+data = get_raw_input_data()
+    
+# Prepare input data
+X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
+
+RES_FEATURES = 58
+RES_LABELS = 4
+result = np.empty((0, RES_FEATURES + RES_LABELS))
+
+prev_x = None
+
+# For each instance in the dataset
+assert X.shape[0] == y.shape[0]
+for i in range(X.shape[0]):
+    curr_x, curr_t = X[i, :], y[i, :]
+
+    if prev_x is None:
+        prev_x = np.copy(curr_x)
+        continue
+    
+    features = build_features(prev_x, curr_x)
+    labels = np.array([curr_t[0], curr_t[1], curr_t[2], curr_t[3]])
+    instance = np.concatenate((features, labels)).reshape(1, -1)
+
+    result = np.concatenate((result, instance), axis=0)
 
     # Update the previous points
     prev_x = curr_x
 
-dutils.save_np_array_to_csv(result, output_dataset)
+dutils.save_np_array_to_csv(result, OUT_DATASET)

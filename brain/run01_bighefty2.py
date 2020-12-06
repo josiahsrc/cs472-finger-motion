@@ -20,21 +20,7 @@ N_FEATURES = data.shape[1] - N_LABELS
 X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES:])
 
 # Split train and test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
-
-# # Build the model
-# model = MLPRegressor(
-#     hidden_layer_sizes=(150, 200, 100,),
-#     activation='relu',
-#     solver='adam',
-# )
-
-# # Fit the model
-# model.fit(X_train, y_train)
-
-# # Evaluate the model
-# print(f'R^2={dutils.score_avg_rquared(model, X_test, y_test)}')
-# print(f'MSE={dutils.score_avg_mse(model, X_test, y_test)}')
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
 # Build the model
 model = tf.keras.models.Sequential([
@@ -57,8 +43,15 @@ model.compile(
 )
 
 # Fit the model
-model.fit(X_train, y_train, epochs=500)
+model.fit(
+    X_train, 
+    y_train, 
+    epochs=500,
+    validation_split=.02
+)
 
 # Evaluate the model
 score = model.evaluate(X_test, y_test)
 print(f'MSE={score}')
+
+model.save('saved/bighefty2')
