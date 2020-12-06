@@ -21,21 +21,6 @@ X, y = dutils.prepare_data_imputed_norm(data[:, :N_FEATURES], data[:, N_FEATURES
 
 # Split train and test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-X_train, X_validate, y_train, y_validate = train_test_split(X_train, y_train, test_size=0.10)
-
-# # Build the model
-# model = MLPRegressor(
-#     hidden_layer_sizes=(150, 200, 100,),
-#     activation='relu',
-#     solver='adam',
-# )
-
-# # Fit the model
-# model.fit(X_train, y_train)
-
-# # Evaluate the model
-# print(f'R^2={dutils.score_avg_rquared(model, X_test, y_test)}')
-# print(f'MSE={dutils.score_avg_mse(model, X_test, y_test)}')
 
 # Build the model
 model = tf.keras.models.Sequential([
@@ -62,9 +47,11 @@ model.fit(
     X_train, 
     y_train, 
     epochs=500,
-    # validation_data=(X_validate, validate)
+    validation_split=.02
 )
 
 # Evaluate the model
 score = model.evaluate(X_test, y_test)
 print(f'MSE={score}')
+
+model.save('saved/bighefty2')
