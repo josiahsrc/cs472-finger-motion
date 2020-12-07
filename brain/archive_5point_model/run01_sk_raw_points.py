@@ -1,8 +1,9 @@
+import setup
+
 import warnings
 import pandas as pd
 import numpy as np
 import data_utils as dutils
-import setup
 
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split

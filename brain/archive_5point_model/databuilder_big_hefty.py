@@ -10,12 +10,12 @@
 # - Differences
 
 # TODO: Make features, angle, etc...
+import setup
 
 import pandas as pd
 import numpy as np
 import sys
 import data_utils as dutils
-import setup
 import math
 
 def rads_between(v1, v2):

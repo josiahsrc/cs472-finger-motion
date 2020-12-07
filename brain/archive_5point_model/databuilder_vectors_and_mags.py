@@ -1,11 +1,11 @@
 # This builder will build a dataset which uses vectors and magnitudes for the 
 # finger joints instead of raw points.
+import setup
 
 import pandas as pd
 import numpy as np
 import sys
 import data_utils as dutils
-import setup
 
 N_FEATURES = 10
 N_LABELS = 4
