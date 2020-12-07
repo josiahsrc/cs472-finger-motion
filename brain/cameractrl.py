@@ -25,6 +25,22 @@ class CameraCtrl():
 
         #These colors are HSV values
         #Edward presets:
+<<<<<<< HEAD
+        self.greenLower = np.array([37, 0, 135])
+        self.greenUpper = np.array([66, 116, 255])
+
+        self.orangeLower = np.array([2, 163, 215])
+        self.orangeUpper = np.array([10, 255, 255])
+
+        self.blueLower = np.array([91, 149, 123])
+        self.blueUpper = np.array([106, 255, 255])
+
+        self.purpleLower = np.array([134, 76, 75])
+        self.purpleUpper = np.array([158, 255, 255])
+        
+        self.pinkLower = np.array([165, 116, 116])
+        self.pinkUpper = np.array([175, 255, 255])
+=======
         # self.greenLower = np.array([34, 75, 32])
         # self.greenUpper = np.array([84, 255, 242])
 
@@ -39,6 +55,7 @@ class CameraCtrl():
         
         # self.pinkLower = np.array([157, 139, 146])
         # self.pinkUpper = np.array([176, 255, 255])
+>>>>>>> da31e7146be82d1036305ff55885ac98e5cecdcb
 
         
         # Josiah presets
